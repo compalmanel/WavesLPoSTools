@@ -26,12 +26,12 @@ const sqlup = `
 INSERT INTO blocks (height, generator, fees)
 SELECT 1, 'add', 1
 WHERE NOT EXISTS(SELECT 1 FROM blocks WHERE height = 1');
-`
+`;
 
 const config = JSON.parse(fs.readFileSync("config.json"));
 
 // open the database
-let db = new sqlite3.Database('blocks.db', (err) => {
+const db = new sqlite3.Database('blocks.db', (err) => {
   if (err) {
     console.error(err.message);
   }
