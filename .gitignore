@@ -2,6 +2,7 @@
 # other configuration and data files should be kept out
 payout.json
 config.json
+blocks.db
 
 # Exclude nodejs related stuff
 node_modules/

@@ -11,12 +11,13 @@
     "waves",
     "blockchain"
   ],
-  "author": "Marc Jansen",
+  "author": "Paulo Albuquerque",
   "license": "ISC",
   "dependencies": {
     "axios": "^0.18.0",
     "line-reader-sync": "^0.1.0",
     "request": "^2.81.0",
+    "sqlite3": "^4.0.2",
     "sync-request": "^4.0.2"
   }
 }
