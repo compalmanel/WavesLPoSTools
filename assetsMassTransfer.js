@@ -16,7 +16,8 @@ const submitTransfers = function() {
     };
     Promise.all(requests)
         .then(values => {
-            console.log(`${values.length} massTransfer transactions were submitted!`)
+            console.log(`${values.length} massTransfer transactions were submitted!`);
+            console.log(`${values.filter(value => value != null).length} massTransfer transactions were accepted!`);
         })
         .catch(error => {
             console.error(error.response ? `Got error status ${error.response.status} during transfer: ${error.response.data.message}` : `${error.message}`);
@@ -43,6 +44,9 @@ const transfersPerAsset = function(accumulator, currentValue) {
 
 /**
  * This method executes the actual asset mass transfer transaction
+ * a list of promises is returned
+ * when each promise is resolved the info about the individual transfers in each batch will be logged
+ * every promise succeeds as errors are being caught and logged
  * 
  * @param transfers the list of transfers, there is no limit on the lenght of the list, they will be submitted in batches of 100
  * @param assetId the assetId to pay, might be "Waves"
@@ -58,15 +62,17 @@ const assetsMassTransfer = function(transfers, assetId) {
         let massTransfer = { version: 1,
                              assetId,
                              sender: config.address,
-                             fee: ( 10 + transfers.length * 5 % 10 === 0 ? 10 + transfers.length * 50 : 10 + transfers.length * 5 + 5 ) * 10000,
+                             fee: ( 10 + transfers.length * 5 % 10 === 0 ? 10 + transfers.length * 5 : 10 + transfers.length * 5 + 5 ) * 10000,
                              transfers
                            };
         if( assetId === "Waves") {
             delete massTransfer.assetId;
         }
-//        console.log(JSON.stringify(massTransfer));
+ //       console.log(JSON.stringify(massTransfer));
+ //       batch.push(Promise.resolve(true));
         batch.push(axios.post(url, massTransfer, {headers})
                        .then(value => value.data.transfers.map(tranfer => console.log(`Sent ${tranfer.amount} of ${value.data.assetId} to ${transfer.recipient}!`)))
+                       .catch(error => console.error(error.response ? `Got error status ${error.response.status} during transfer: ${error.response.data.message}` : `${error.message}`))
         );
     };
     return batch;
