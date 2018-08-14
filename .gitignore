@@ -1,4 +1,6 @@
 # only config.json.sample should be kept in the repository
+# other configuration and data files should be kept out
+payout.json
 config.json
 
 # Exclude nodejs related stuff
