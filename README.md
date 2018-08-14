@@ -27,7 +27,9 @@ verificar nova versão com sponfored asset fees
 }
 start e end são chaver externas, block.height
 
-
+Add information about the config options:
+    "feeAssetId": "",
+    "fee": 1
 
 SELECT 
 FROM blocks b
