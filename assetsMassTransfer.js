@@ -7,7 +7,9 @@ const axios = require('axios');
  */
 const submitTransfers = function() {
     const transfers = JSON.parse(fs.readFileSync(config.filename));
+    console.log(`${transfers.length} total transfers were found:`);
     const assets = transfers.reduce(transfersPerAsset, {});
+    Object.keys(assets).map( asset => console.log(`${assets[asset].length} transfers of ${asset}`)) ;
     let requests = [];
     for( const assetId in assets ) {
         requests = requests.concat(assetsMassTransfer(assets[assetId], assetId));
@@ -56,13 +58,13 @@ const assetsMassTransfer = function(transfers, assetId) {
         let massTransfer = { version: 1,
                              assetId,
                              sender: config.address,
-                             fee: Math.ceil(transfers.length * 0.5 + 0.1) * 100000,
+                             fee: ( 10 + transfers.length * 5 % 10 === 0 ? 10 + transfers.length * 50 : 10 + transfers.length * 5 + 5 ) * 10000,
                              transfers
                            };
         if( assetId === "Waves") {
             delete massTransfer.assetId;
         }
-        console.log(JSON.stringify(massTransfer));
+//        console.log(JSON.stringify(massTransfer));
         batch.push(axios.post(url, massTransfer, {headers})
                        .then(value => value.data.transfers.map(tranfer => console.log(`Sent ${tranfer.amount} of ${value.data.assetId} to ${transfer.recipient}!`)))
         );
