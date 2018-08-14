@@ -1,0 +1,22 @@
+{
+  "name": "lposdistributor",
+  "version": "0.0.1",
+  "description": "An LPoS distributor for the Waves Platform",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "lpos",
+    "waves",
+    "blockchain"
+  ],
+  "author": "Marc Jansen",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "line-reader-sync": "^0.1.0",
+    "request": "^2.81.0",
+    "sync-request": "^4.0.2"
+  }
+}

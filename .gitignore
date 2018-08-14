@@ -1,0 +1,5 @@
+# only config.json.sample should be kept in the repository
+config.json
+
+# Exclude nodejs related stuff
+node_modules/
