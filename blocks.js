@@ -17,6 +17,17 @@ CREATE TABLE IF NOT EXISTS leases (
 )
 `;
 
+const sqlins = `
+INSERT INTO blocks (height, generator, fees)
+VALUES (1, 'add', 1), (2, 'add', 2), (3, 'add', 3);
+`;
+
+const sqlup = `
+INSERT INTO blocks (height, generator, fees)
+SELECT 1, 'add', 1
+WHERE NOT EXISTS(SELECT 1 FROM blocks WHERE height = 1');
+`
+
 const config = JSON.parse(fs.readFileSync("config.json"));
 
 // open the database
