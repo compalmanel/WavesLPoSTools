@@ -10,16 +10,17 @@ const schemaSQL = [
     fees integer NOT NULL DEFAULT 0,
     txs integer NOT NULL DEFAULT 0,
     timestamp integer NOT NULL
-);`,
+  );`,
   `CREATE INDEX IF NOT EXISTS idx_generator ON blocks (generator);`,
   `CREATE TABLE IF NOT EXISTS leases (
-    leaser text,
-    start integer,
+    tx integer PRIMARY KEY, 
+    leaser text NOT NULL,
+    start integer NOT NULL,
     end integer,
-    node text,
-    amount integer,
-    PRIMARY KEY (leaser, start)
-);`];
+    node text NOT NULL,
+    amount integer NOT NULL
+  );`
+];
 
 const sqlins = `
 INSERT INTO blocks (height, generator, fees, timestamp)
