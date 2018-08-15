@@ -14,7 +14,7 @@ var myForgedBlocks = [];
  * and serializing them into a file that could be used as input for the
  * masspayment tool.
  */
-var start = function() {
+var start = function () {
     console.log('getting blocks...');
     var blocks = getAllBlocks();
     if (fs.existsSync(config.blockStorage)) {
@@ -22,11 +22,11 @@ var start = function() {
     }
     console.log('preparing datastructures...');
     prepareDataStructure(blocks);
-    blocks.forEach(function(block) {
+    blocks.forEach(function (block) {
         var transactions = [];
 
         if (block.height < config.startBlockHeight) {
-            block.transactions.forEach(function(tx) {
+            block.transactions.forEach(function (tx) {
                 if (tx.type === 8 || tx.type === 9) {
                     transactions.push(tx);
                 }
@@ -45,7 +45,7 @@ var start = function() {
         fs.appendFileSync(config.blockStorage, JSON.stringify(blockInfo) + '\n');
     });
     console.log('preparing payments...');
-    myForgedBlocks.forEach(function(block) {
+    myForgedBlocks.forEach(function (block) {
         if (block.height >= config.startBlockHeight && block.height <= config.endBlock) {
             var blockLeaseData = getActiveLeasesAtBlock(block);
             var activeLeasesForBlock = blockLeaseData.activeLeases;
@@ -63,16 +63,16 @@ var start = function() {
  *
  *   @param blocks all blocks that should be considered
  */
-var prepareDataStructure = function(blocks) {
+var prepareDataStructure = function (blocks) {
     var previousBlock;
-    blocks.forEach(function(block) {
+    blocks.forEach(function (block) {
         var wavesFees = 0;
 
         if (block.generator === config.address) {
             myForgedBlocks.push(block);
         }
 
-        block.transactions.forEach(function(transaction) {
+        block.transactions.forEach(function (transaction) {
             // type 8 are leasing tx
             if (transaction.type === 8 && (transaction.recipient === config.address || transaction.recipient === "address:" + config.address || transaction.recipient === 'alias:W:' + config.alias)) {
                 transaction.block = block.height;
@@ -86,6 +86,8 @@ var prepareDataStructure = function(blocks) {
                 if (transaction.fee < 10 * Math.pow(10, 8)) {
                     wavesFees += transaction.fee;
                 }
+            } else if (block.height > 1090000 && transaction.type === 4) {
+                wavesFees += 100000;
             }
         });
         if (previousBlock) {
@@ -101,7 +103,7 @@ var prepareDataStructure = function(blocks) {
  *
  * @returns {Array} all relevant blocks
  */
-var getAllBlocks = function() {
+var getAllBlocks = function () {
     // leases have been resetted in block 462000, therefore, this is the first relevant block to be considered
     var firstBlockWithLeases = 462000;
     var currentStartBlock = firstBlockWithLeases;
@@ -112,9 +114,9 @@ var getAllBlocks = function() {
         lrs = new LineReaderSync(config.blockStorage);
 
         var lineFound = true;
-        while(lineFound){
+        while (lineFound) {
             var line = lrs.readline()
-            if(line){
+            if (line) {
                 blocks.push(JSON.parse(line));
             } else {
                 lineFound = false;
@@ -151,7 +153,7 @@ var getAllBlocks = function() {
             }).getBody('utf8'));
         }
         if (currentBlocks.length > 0) {
-            currentBlocks.forEach(function(block) {
+            currentBlocks.forEach(function (block) {
                 if (block.height <= config.endBlock) {
                     blocks.push(block);
                 }
@@ -176,7 +178,7 @@ var getAllBlocks = function() {
  * @param amountTotalLeased total amount of leased waves in this particular block
  * @param block the block to consider
  */
-var distribute = function(activeLeases, amountTotalLeased, block, previousBlock) {
+var distribute = function (activeLeases, amountTotalLeased, block, previousBlock) {
     var fee;
 
     if (block.height >= 805000) {
@@ -204,7 +206,7 @@ var distribute = function(activeLeases, amountTotalLeased, block, previousBlock)
  * Method that creates the concrete payment tx and writes it to the file
  * configured in the config section.
  */
-var pay = function() {
+var pay = function () {
     var transactions = [];
     for (var address in payments) {
         var payment = (payments[address] / Math.pow(10, 8));
@@ -229,7 +231,7 @@ var pay = function() {
             });
         }
     }
-    fs.writeFile(config.filename, JSON.stringify(transactions), {}, function(err) {
+    fs.writeFile(config.filename, JSON.stringify(transactions), {}, function (err) {
         if (!err) {
             console.log('payments written to ' + config.filename + '!');
         } else {
@@ -245,7 +247,7 @@ var pay = function() {
  * @param block the block to consider
  * @returns {{totalLeased: number, activeLeases: {}}} total amount of leased waves and active leases for the given block
  */
-var getActiveLeasesAtBlock = function(block) {
+var getActiveLeasesAtBlock = function (block) {
     var activeLeases = [];
     var totalLeased = 0;
     var activeLeasesPerAddress = {};
