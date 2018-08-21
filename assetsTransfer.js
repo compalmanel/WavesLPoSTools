@@ -1,20 +1,20 @@
-const fs = require('fs');
-const axios = require('axios');
+const fs = require('fs')
+const axios = require('axios')
 
 /**
  * Read the list of transfers from a file, and submit them to the node we are using
  */
 const submitTransfers = function () {
-    const transfers = getTransfers(config.filename);
-    Promise.all(transfers.map(assetsTransfer))
-        .then(values => {
-            console.log(`${values.length} transfer transactions were submitted!`);
-            console.log(`${values.filter(value => value != null).length} transfer transactions were accepted!`);
-        })
-        .catch(error => {
-            console.error(error.response ? `Got error status ${error.response.status} during transfer: ${error.response.data.message}` : `${error.message}`);
-        });
-};
+  const transfers = getTransfers(config.filename)
+  Promise.all(transfers.map(assetsTransfer))
+    .then(values => {
+      console.log(`${values.length} transfer transactions were submitted!`)
+      console.log(`${values.filter(value => value != null).length} transfer transactions were accepted!`)
+    })
+    .catch(error => {
+      console.error(error.response ? `Got error status ${error.response.status} during transfer: ${error.response.data.message}` : `${error.message}`)
+    })
+}
 
 /**
  * Obtain the list of transfers to process
@@ -23,22 +23,22 @@ const submitTransfers = function () {
  * @param filename the filename containing the transfer list
  */
 const getTransfers = function (filename) {
-    if (config.feeAssetId !== null) {
-        const transfers = JSON.parse(fs.readFileSync(filename)).map(transfer => ({
-            "amount": transfer.amount,
-            "fee": config.fee,
-            "sender": transfer.sender,
-            "attachment": transfer.attachment,
-            "recipient": transfer.recipient,
-            "feeAssetId": config.feeAssetId
-        }));
-        console.log(`${transfers.length} transfers were found, feeAssedId was overriden with '${config.feeAssetId}' and fee is: ${config.fee}...`);
-        return transfers;
-    } else {
-        const transfers = JSON.parse(fs.readFileSync(filename));
-        console.log(`${transfers.length} transfers were found...`);
-        return transfers;
-    };
+  if (config.feeAssetId !== null) {
+    const transfers = JSON.parse(fs.readFileSync(filename)).map(transfer => ({
+      'amount': transfer.amount,
+      'fee': config.fee,
+      'sender': transfer.sender,
+      'attachment': transfer.attachment,
+      'recipient': transfer.recipient,
+      'feeAssetId': config.feeAssetId
+    }))
+    console.log(`${transfers.length} transfers were found, feeAssedId was overriden with '${config.feeAssetId}' and fee is: ${config.fee}...`)
+    return transfers
+  } else {
+    const transfers = JSON.parse(fs.readFileSync(filename))
+    console.log(`${transfers.length} transfers were found...`)
+    return transfers
+  }
 }
 
 /**
@@ -49,12 +49,12 @@ const getTransfers = function (filename) {
  * @param transfer the object defining the transfer
  */
 const assetsTransfer = function (transfer) {
-    const url = `${config.node}/assets/transfer`;
-    const headers = { "Accept": "application/json", "Content-Type": "application/json", "api_key": config.apiKey };
-    return axios.post(url, transfer, { headers })
-        .then(value => console.log(`Sent ${value.data.amount} of ${value.data.assetId} to ${value.data.recipient}!`))
-        .catch(error => console.error(error.response ? `Got error status ${error.response.status} during transfer: ${error.response.data.message}` : `${error.message}`));
+  const url = `${config.node}/assets/transfer`
+  const headers = { 'Accept': 'application/json', 'Content-Type': 'application/json', 'api_key': config.apiKey }
+  return axios.post(url, transfer, { headers })
+    .then(value => console.log(`Sent ${value.data.amount} of ${value.data.assetId} to ${value.data.recipient}!`))
+    .catch(error => console.error(error.response ? `Got error status ${error.response.status} during transfer: ${error.response.data.message}` : `${error.message}`))
 }
 
-const config = JSON.parse(fs.readFileSync("config.json"));
-submitTransfers();
+const config = JSON.parse(fs.readFileSync('config.json'))
+submitTransfers()
