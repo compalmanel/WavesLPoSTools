@@ -1,102 +1,180 @@
-const sqlite3 = require('sqlite3').verbose();
-const request = require('sync-request');
-const fs = require('fs');
-const axios = require('axios');
+const sqlite = require('sqlite')
+const axios = require('axios')
+const http = require('http')
+const https = require('https')
+const fs = require('fs')
+
+/*
+* Create session defaults for axios
+*/
+module.exports = axios.create({
+  // 60 sec timeout
+  timeout: 60000,
+  // keepAlive pools and reuses TCP connections, so it's faster
+  httpAgent: new http.Agent({ keepAlive: true }),
+  httpsAgent: new https.Agent({ keepAlive: true }),
+  // follow up to 10 HTTP 3xx redirects
+  maxRedirects: 10,
+  // cap the maximum content length we'll accept to 50MBs, just in case
+  maxContentLength: 50 * 1000 * 1000
+})
 
 const schemaSQL = [
+  `CREATE TABLE IF NOT EXISTS nodes (
+    address text PRIMARY KEY,
+    alias text
+  );`,
   `CREATE TABLE IF NOT EXISTS blocks (
     height integer PRIMARY KEY,
-    generator text NOT NULL,
+    generator text NOT NULL REFERENCES nodes (address),
     fees integer NOT NULL DEFAULT 0,
     txs integer NOT NULL DEFAULT 0,
     timestamp integer NOT NULL
-  );`,
-  `CREATE INDEX IF NOT EXISTS idx_generator ON blocks (generator);`,
+  );`, /*,
+  `CREATE TRIGGER IF NOT EXISTS new_node
+   BEFORE INSERT ON blocks
+   FOR EACH ROW WHEN NOT EXISTS (SELECT address FROM nodes WHERE address = new.generator)
+   BEGIN
+       INSERT OR REPLACE INTO nodes (address) VALUES (new.generator);
+   END;`, */
   `CREATE TABLE IF NOT EXISTS leases (
-    tx integer PRIMARY KEY, 
-    leaser text NOT NULL,
+    id text PRIMARY KEY, 
+    sender text NOT NULL,
+    recipient text NOT NULL,
     start integer NOT NULL,
     end integer,
-    node text NOT NULL,
     amount integer NOT NULL
-  );`
-];
+  );`,
+  `CREATE VIEW IF NOT EXISTS missing_blocks AS
+   SELECT a.height + 1 AS height
+   FROM blocks a
+   WHERE NOT EXISTS (
+                   SELECT 1
+                   FROM blocks b
+                   WHERE b.height = a.height + 1
+                  )
+   ORDER BY a.height ASC;`
+]
 
-const sqlins = `
-INSERT INTO blocks (height, generator, fees, timestamp)
-VALUES (1, 'add', 1), (2, 'add', 2), (3, 'add', 3);`;
+/**
+ * Store a transaction in the database
+ * returns a Promise
+ *
+ * @param db the database handle that represents a valid open connection
+ * @param height the height of the block this transactions belongs to
+ * @param transaction the transaction object
+ */
+const storeTransaction = function (db, height, transaction) {
+  // handlers for each transaction type
+  const txHandler = {
+    8: transaction => db.run(`INSERT INTO leases (id, sender, recipient, start, amount) VALUES (?, ?, ?, ?, ?);`,
+      [transaction.id, transaction.sender, transaction.recipient, height, transaction.amount]),
+    9: transaction => db.run(`UPDATE leases SET end = ? WHERE id = ?`, [height, transaction.leaseId])
+  }
+  return transaction.type in txHandler ? txHandler[transaction.type](transaction) : Promise.resolve(true)
+}
 
-const lastblock = `
-SELECT MAX(height) AS top
-FROM blocks;`;
-
+/**
+ * Store a block in the database
+ * returns a Promise
+ *
+ * @param db the database handle that represents a valid open connection
+ * @param transaction the block object
+ */
 const storeBlock = function (db, block) {
   // calculate fees
   const fees = block.transactions.reduce((accumulator, currentValue) => {
     if (!currentValue.feeAsset || currentValue.feeAsset === '' || currentValue.feeAsset === null) {
       if (currentValue.fee < 10 * Math.pow(10, 8)) {
-        return accumulator + currentValue.fee;
+        return accumulator + currentValue.fee
       }
     } else if (block.height > 1090000 && currentValue.type === 4) {
-      return accumulator + 100000;
+      return accumulator + 100000
     }
-  }, 0);
-  // write the blocks db record
-  return db.run(`INSERT OR REPLACE INTO blocks (height, generator, fees, txs, timestamp) VALUES (?, ?, ?, ?, ?);`,
-    [block.height, block.generator, fees, block.transactions.length, block.timestamp],
-    function (err) {
-      if (err) {
-        return console.log(err.message);
-      }
-      return `${this.lastID}`;
-    });
-};
+  }, 0)
+  // write to the corresponding tables
+  const savedBlock = [db.run(`INSERT OR REPLACE INTO blocks (height, generator, fees, txs, timestamp) VALUES (?, ?, ?, ?, ?);`,
+    [block.height, block.generator, fees, block.transactions.length, block.timestamp])]
+  const savedTransactions = block.transactions.map(tx => storeTransaction(db, block.height, tx))
+  // return a Promise
+  return Promise.all([...savedBlock, ...savedTransactions])
+    .catch(error => {
+      console.error(error.message)
+    })
+}
 
-const getBlocks = function (db) {
-  const currentStartBlock = 1;
-  const endBlock = 100;
-  currentBlocks = JSON.parse(request('GET', config.node + '/blocks/seq/' + currentStartBlock + '/' + endBlock, {
-    'headers': {
-      'Connection': 'keep-alive'
-    }
-  }).getBody('utf8'));
-  return currentBlocks.map(block => storeBlock(db, block));
-};
-
-const config = JSON.parse(fs.readFileSync("config.json"));
-
-// open the database
-const db = new sqlite3.Database('blocks.db', (err) => {
-  if (err) {
-    console.error(err.message);
+/**
+ * Returns the list of blocks that was requested
+ * the blocks are retrieved in batches of 100 and saved to the database
+ * returns a Promise
+ *
+ * @param db the database handle that represents a valid open connection
+ * @param startHeight the starting block height
+ * @param endHeight the ending block height
+ */
+const getBlocks = async function (db, startHeight, endHeight) {
+  for (let i = startHeight; i <= endHeight; i += 100) {
+    await axios.get(`${config.node}/blocks/seq/${i}/${i + 99}`)
+      .then(value => {
+        Promise.all(value.data.map(block => storeBlock(db, block)))
+        console.log(`Stored blocks ${i} to ${i + 99}`)
+      })
+      .catch(error => {
+        console.error(error.message)
+        process.exit(1)
+      })
   }
-  console.log('Connected to the blocks database.');
-});
+}
 
-db.serialize(() => {
+/**
+ * Creates of updates a sqlite database with the Waves Blockchain information
+ *
+ */
+const updateDatabase = async function () {
+  // open the database
+  const db = await sqlite.open(config.blockStorage)
+    .then(value => {
+      console.log('Connected to the blocks database.')
+      return value
+    })
+    .catch(error => {
+      console.error(error.message)
+      process.exit(1)
+    })
 
-  // (re)create schema
-  schemaSQL.map(stmt => db.run(stmt, function (err) {
-    if (err) {
-      return console.error(err.message);
-    }
-  }));
-
-  // populate data
-  db.parallelize(() => getBlocks(db));
-
-  const row = db.get(lastblock, [], (err, row) => {
-    if (err) {
-      console.error(err.message);
-      return null;
-    }
-    return row ? console.log(row.top) : console.log(`No results`);
-  });
-});
-
-db.close((err) => {
-  if (err) {
-    console.error(err.message);
+  // handle the schema
+  for (const stmt of schemaSQL) {
+    await db.run(stmt)
+      .catch(error => {
+        console.error(error.message)
+        process.exit(1)
+      })
   }
-  console.log('Closed the database connection.');
-});
+  console.log('Schema is ok...')
+
+  // try the download the blocks we are missing
+  const [start, end] = await Promise.all([
+    db.get('SELECT height FROM missing_blocks;')
+      .then(value => value ? value.height : 0),
+    axios.get(`${config.node}/blocks/height`)
+      .then(value => value.data.height)
+  ]).catch(error => {
+    console.error(error.message)
+    process.exit(1)
+  })
+  console.log(`Will try to download blocks from ${start} to ${end}`)
+  await getBlocks(db, start, end)
+
+  // close the database
+  db.close()
+    .then(value => {
+      console.log('Closed connection to the blocks database.')
+    })
+    .catch(error => {
+      console.error(error.message)
+      process.exit(1)
+    })
+}
+
+const config = JSON.parse(fs.readFileSync('config.json'))
+updateDatabase()

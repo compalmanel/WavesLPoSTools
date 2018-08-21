@@ -1,5 +1,5 @@
-const fs = require('fs');
-const axios = require('axios');
+const fs = require('fs')
+const axios = require('axios')
 
 /**
  * Read the list of transfers from a file and aggregate them per asset

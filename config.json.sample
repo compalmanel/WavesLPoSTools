@@ -7,6 +7,6 @@
     "filename": "payout.json",
     "node": "http://localhost:6869",
     "percentageOfFeesToDistribute": 100,
-    "blockStorage": "blocks.json",
+    "blockStorage": "blocks.db",
     "apiKey": ""
 }
