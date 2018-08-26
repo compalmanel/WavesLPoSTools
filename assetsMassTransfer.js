@@ -10,10 +10,7 @@ const submitTransfers = function () {
   console.log(`${transfers.length} total transfers were found:`)
   const assets = transfers.reduce(transfersPerAsset, {})
   Object.keys(assets).map(asset => console.log(`${assets[asset].length} transfers of ${asset}`))
-  let requests = []
-  for (const assetId in assets) {
-    requests = requests.concat(assetsMassTransfer(assets[assetId], assetId))
-  };
+  const requests = Object.keys(assets).map(assetId => assetsMassTransfer(assets[assetId], assetId))
   Promise.all(requests)
     .then(values => {
       console.log(`${values.length} massTransfer transactions were submitted!`)
