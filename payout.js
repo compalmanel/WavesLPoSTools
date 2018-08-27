@@ -1,35 +1,39 @@
 const sqlite = require('sqlite')
 const fs = require('fs')
 
-const sqlquery = `SELECT leaser, SUM(payable) AS amount
+const sqlquery = `SELECT leaser,
+SUM(payable) AS amount
 FROM (
     WITH block_leases AS (
-        SELECT l.sender AS leaser,
-               b.height AS height,
-               SUM(l.amount) AS amount 
-        FROM leases l
-        INNER JOIN blocks b ON l.start + 1000 <= b.height AND l.end <= b.height AND l.recipient = b.generator
-        WHERE b.height BETWEEN ? AND ?
-        AND b.generator = ?
-        GROUP BY l.sender, b.height
-    ),
-        total_leases AS (
-        SELECT b.height AS height,
-               SUM(l.amount) AS amount 
-        FROM leases l
-        INNER JOIN blocks b ON l.start + 1000 <= b.height AND l.end <= b.height AND l.recipient = b.generator
-        WHERE b.height BETWEEN ? AND ?
-        AND b.generator = ?
-        GROUP BY b.height
+      SELECT l.sender AS leaser,
+             b.height AS height,
+             SUM(l.amount) AS amount
+      FROM blocks b
+      INNER JOIN leases l ON b.height >= l.start + 1000
+                          AND (b.height <= l.[end] OR l.[end] IS NULL) 
+                          AND l.recipient = b.generator
+      WHERE b.height BETWEEN ? AND ?  
+      AND b.generator = ?
+      GROUP BY l.sender,
+               b.height
+    ), total_leases AS (
+      SELECT b.height AS height,
+             SUM(l.amount) AS amount
+      FROM blocks b
+      INNER JOIN leases l ON b.height >= l.start + 1000
+                          AND (b.height <= l.[end] OR l.[end] IS NULL) 
+                          AND l.recipient = b.generator
+      WHERE b.height BETWEEN ? AND ?
+      AND b.generator = ?
+     GROUP BY b.height
     )
     SELECT l.leaser,
-           CAST(SUM(l.amount) * 1.0 / SUM(t.amount) * b.fees AS INTEGER) AS payable
+           CAST(l.amount * 1.0 / t.amount * b.fees AS INTEGER) AS payable
     FROM blocks b
     INNER JOIN block_leases l ON b.height = l.height
     INNER JOIN total_leases t ON l.height = t.height
-    GROUP BY l.leaser, b.height
 )
-GROUP BY LEASER
+GROUP BY leaser
 HAVING SUM(payable) > 0`
 
 /**
