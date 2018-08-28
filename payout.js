@@ -122,9 +122,7 @@ const calculatePayout = async function () {
         console.error(error.message)
         process.exit(1)
       }) ])
-  const payout = dbrows.reduce(function (a, b) {
-    return a.concat(b)
-  }, [])
+  const payout = dbrows.reduce((a, b) => a.concat(b), [])
   fs.writeFileSync(config.filename, JSON.stringify(payout))
   console.log(`Dumped ${payout.length} payments!`)
 }
