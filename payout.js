@@ -100,10 +100,6 @@ const calculatePayout = async function () {
             'recipient': row.leaser
           }
         })
-      })
-      .catch(error => {
-        console.error(error.message)
-        process.exit(1)
       }),
     db.all(mrtSQL, [config.startBlock, config.endBlock, config.address, config.startBlock, config.endBlock, config.address, config.distributableMrtPerBlock])
       .then(rows => {
@@ -117,11 +113,11 @@ const calculatePayout = async function () {
             'recipient': row.leaser
           }
         })
-      })
-      .catch(error => {
-        console.error(error.message)
-        process.exit(1)
       }) ])
+    .catch(error => {
+      console.error(error.message)
+      process.exit(1)
+    })
   const payout = dbrows.reduce((a, b) => a.concat(b), [])
   fs.writeFileSync(config.filename, JSON.stringify(payout))
   console.log(`Dumped ${payout.length} payments!`)
