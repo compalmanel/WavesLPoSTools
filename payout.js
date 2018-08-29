@@ -28,9 +28,10 @@ FROM (
       GROUP BY b.height
     )
     SELECT l.leaser,
-           CAST(l.amount * 1.0 / t.amount * b.fees AS INTEGER) AS payable
-    FROM blocks b
-    INNER JOIN block_leases l ON b.height = l.height
+           CAST( (l.amount * 1.0 / t.amount) * (b1.fees * 0.4 + b2.fees * 0.6) AS INTEGER) AS payable
+    FROM blocks b1
+    INNER JOIN blocks b2 ON b2.height = b1.height + 1
+    INNER JOIN block_leases l ON b1.height = l.height
     INNER JOIN total_leases t ON l.height = t.height
 )
 GROUP BY leaser
