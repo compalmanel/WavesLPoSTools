@@ -28,9 +28,9 @@ FROM (
       GROUP BY b.height
     )
     SELECT l.leaser,
-           CAST( (l.amount * 1.0 / t.amount) * (b1.fees * 0.4 + b2.fees * 0.6) AS INTEGER) AS payable
+           CAST( (l.amount * 1.0 / t.amount) * (? / 100) * (b1.fees * 0.4 + b2.fees * 0.6) AS INTEGER) AS payable
     FROM blocks b1
-    INNER JOIN blocks b2 ON b2.height = b1.height + 1
+    INNER JOIN blocks b2 ON b2.height = b1.height - 1
     INNER JOIN block_leases l ON b1.height = l.height
     INNER JOIN total_leases t ON l.height = t.height
 )
@@ -77,7 +77,7 @@ HAVING SUM(payable) > 0`
  */
 const calculatePayout = async function () {
   // open the database
-  const db = await sqlite.open(config.blockStorage)
+  const db = await sqlite.open(config.blockStorage, sqlite.OPEN_READONLY)
     .then(value => {
       console.log('Connected to the blocks database.')
       return value
@@ -90,7 +90,7 @@ const calculatePayout = async function () {
   // query the dabatase
   console.log('Calculating payout...')
   const dbrows = await Promise.all([
-    db.all(feeSQL, [config.startBlock, config.endBlock, config.address, config.startBlock, config.endBlock, config.address])
+    db.all(feeSQL, [config.startBlock, config.endBlock, config.address, config.startBlock, config.endBlock, config.address, config.percentageOfFeesToDistribute])
       .then(rows => {
         return rows.map(row => {
           return {
