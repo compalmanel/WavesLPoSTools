@@ -1,146 +1,71 @@
-This project is inspired by Marc Jansen's WavesLPoSDistributer and follows the same conventions as much as possible. The objective is being able to verify the correctness of each script's output
+# WavesLPoSTools
+A set of tools that handle a [Waves](https://wavesplatform.com) node's accounting and payments.
 
-Use modern JavaScript idioms
+This project is modelled on Marc Jansen's [WavesLPoSDistributer](https://github.com/jansenmarc/WavesLPoSDistributer) and follows the same conventions as much as possible. The objective is being a drop in replacement, with the added bonus of being able to verify the correctness of each script's output.
 
-Instead of using global variables (var) the code mostly uses constants (const), and in a couple of instances local variables (let). This makes code more maintainable and also guarantees better memory use
-Use functional programming patterns and promises to squeeze to be able to asyncrhonously handle requests and improve performance
-Use axios to perform REST requests
-Code simplification, make each utility as small as possible, but not smaller
-Improved logging, print more details about operations, print error conditions to stderr
-Have a centralized configuration, it's only necessary to edit one file for all of the scripts to work
+The code was written from scratch, with the intent of improving several areas:
+* providing easier, centralized configuration that is isolated in a separate file;
+* lowering memory and disk requirements;
+* lowering execution time;
+* allowing data analysis and statistics on top of the blockchain information.
 
+The code is written in [Javascript](https://developer.mozilla.org/bm/docs/Web/JavaScript) using modern paradigms like asynchronous and functional programming. It uses [ES6 Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) and [ES7 async/await](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/await) to provide the best performance.
 
-updateDatabase.js
-* lê os blocos
-* INSERT block {
-    height,
-    generator,
-    fees = txs.filter(txtype = 4).reduce(sum)
-}
-height é a chave primária
-verificar nova versão com sponfored asset fees
-* INSERT lease {
-    address,
-    start,
-    end,
-    amount
-}
-start e end são chaver externas, block.height
-
-Add information about the config options:
-    "feeAssetId": "",
-    "fee": 1
-
-SELECT 
-FROM blocks b
-INNER JOIN leases l ON b.height >= l.start + 1000 AND b.height < l.end
-
-# WavesLPoSDistributer
-A revenue distribution tool for Waves nodes
+As in [WavesLPoSDistributer](https://github.com/jansenmarc/WavesLPoSDistributer) you can use the payment utilities to execute payments for any file that conforms to the ```payout.json``` format. So if you have any homebrew utilities that write their output in this format you can keep on using them as usual.
 
 ## Installation
-First of all, you need to install Node.js (https://nodejs.org/en/) and NPM. Afterwards the installation of the dependencies could be done via:
+After cloning this repository to your node or another machine, you need to install [node.js](https://nodejs.org/en/) and [npm](https://www.npmjs.com/). Afterwards the installation of the dependencies is as easy as:
 ```sh
 mkdir node_modules
 npm install
 ```
-Once the dependencies are installed, the script that generates the payouts need to be configured. In order to do so, change the settings of the configuration section:
+The configuration has been streamlined and all of the scripts read the necessary parameters from a single file. Once the dependencies are installed, edit the sample configuration file (```config.json.sample```) and set the values for your node. Save the file as ```config.json```.
+
+If you have used [WavesLPoSDistributer](https://github.com/jansenmarc/WavesLPoSDistributer) you should be familiar with the meaning of each parameter:
+* "address": your node's public address;
+* "alias": your node's alias;
+* "startBlockHeight": the starting height for the payout calculation;
+* "endBlock": the ending height for the payout calculation;
+* "distributableMrtPerBlock": the amount of [Miners Reward Token](https://blog.wavesplatform.com/incentivizing-pos-mining-b26f8702032c) to distribute per block;
+* "filename": the payout list will be saved and read from this file, the default is ```payout.json```, and the format is the same as [WavesLPoSDistributer's](https://github.com/jansenmarc/WavesLPoSDistributer) so you can compare the output;
+* "node": the node to contact to retrieve information and transfer the payout from, you can use ```http://localhost:6869``` if you execute the scripts directly from your node's machine or through a [ssh tunnel](https://www.ssh.com/ssh/tunneling/example);
+* "percentageOfFeesToDistribute": a generator node earns fees according to the number of blocks it has forged, this parameter allows you to specify the percentage of those fees you want to distribute;
+* "blockStorage": the file where blockchain information will be saved, it defaults to ```blocks.db```;
+* "apiKey": the API key for your node, only needed for payments;
+* "feeAssetId": if you're using simple asset transfer transactions you can choose the asset that will be used to pay for the transaction fee, it needs to be a [sponsored asset](https://docs.wavesplatform.com/en/proposals/sponsored-transactions.html), mass transfers are paid only in Waves;
+* "fee": the fee amount in case of using a [sponsored transaction](https://docs.wavesplatform.com/en/proposals/sponsored-transactions.html).
+
+After saving your configuration you can starting using the scripts.
+
+## Updating the blockchain information
+
+Information about generated blocks and active leases is saved into a database file. A [SQLite](https://www.sqlite.org/index.html) database is used. This engine is very efficient in terms of speed, used disk space and memory consumption.
+
+The update process is started with:
 ```sh
-/*
-    Put your settings here:
-        - address: the address of your node that you want to distribute from
-        - startBlockHeight: the block from which you want to start distribution for
-        - endBlock: the block until you want to distribute the earnings
-        - distributableMRTPerBlock: amount of MRT distributed per forged block
-        - filename: file to which the payments for the mass payment tool are written
-        - node: address of your node in the form http://<ip>:<port
-        - percentageOfFeesToDistribute: the percentage of Waves fees that you want to distribute
- */
-var config = {
-    address: '',
-    startBlockHeight: 462000,
-    endBlock: 465000,
-    distributableMrtPerBlock: 20,
-    filename: 'test.json',
-    node: 'http://<ip>:6869',
-    percentageOfFeesToDistribute: 100
-}
+node blocks.js
 ```
-After a successful configuration of the tool, it could be started with:
+This will download all the outstanding blocks and save them to the block storage database file. The first run will take a lot of time as all of the blocks since the genesis block will be downloaded. Subsequent runs will be faster as they will only need to download the delta between each run.
+
+Information for all the nodes will be downloaded and parsed. You can open the block storage database file with [SQLiteStudio](https://sqlitestudio.pl) to query the database and extract statistics.
+## Check the generated payments
+The number of payments and the total amount that will be paid can be verified through the ```checkTransfer.js``` script. The payments will be aggregated per asset.
 ```sh
-node app.js
+node checkTransfer.js
 ```
-After the script is finished, the payments that should be distributed to the leasers are written to the file configured by the _config.filename_ setting in the configuration section.
-## Doing the payments
-For the actual payout, the masspayment tool needs to be run. Before it could be started, it also needs to be configured:
+Always check your resulting payments and compare them to the node's expected earnings and current balance!
+## Paying using the assets/transfer transaction
+After verifying the payments you can trigger the payment. The ```assetsTransfer.js``` script uses the traditional assets/transfer transaction to trigger a separate transaction for each payment. You can use an asset that has been [sponsored](https://docs.wavesplatform.com/en/proposals/sponsored-transactions.html). Use the following command to process the payments stored in ```payout.json```.
 ```sh
-/*
- Put your settings here:
- - filename: file to which the payments for the mass payment tool are written
- - node: address of your node in the form http://<ip>:<port>
- - apiKey: the API key of the node that is used for distribution
- */
-var config = {
-    filename: 'test.json',
-    node: 'http://<ip>:<port>',
-    apiKey: 'put the apiKey for the node here'
-},
+node assetsTransfer.js
 ```
-After configuration, the script could be started with:
+## Paying using the assets/massTransfer transaction
+The [mass transfer transaction](https://medium.com/@wavesgo/the-new-mass-transfer-transaction-in-action-852b60d64d01) was introduced to maximize network throughput and minimize transactions costs. You can use ```assetsMassTransfer.js``` to aggregate the payments per asset and execute those payments in the minimum amount of transactions possible. Use the following command to process the payments stored in ```payout.json```.
 ```sh
-node massPayment.js
+node assetsMassTransfer.js
 ```
-## Why two seperate tools?
-We decided to use two seperate tools since this allows for additional tests of the payments before the payments are actually executed. On the other hand, it does not provide any drawback since both scripts could also be called directly one after the other with:
-```sh
-node apps.js && node massPayment.js
-```
-We strongly recommend to check the payments file before the actual payments are done. In order to foster these checks, we added the _checkPaymentsFile.js_ tool that could need to be configured as follows:
-```sh
-/**
- * Put your settings here:
- *     - filename: file to check for payments
- *     - node: address of your node in the form http://<ip>:<port
- */
-var config = {
-    filename: '',
-    node: 'http://<ip>:<port>'
-};
-```
-After the configuration the checking tool could be executed with:
-```sh
-node checkPaymentsFile.js
-```
-The output of the tool should provide an information about how man tokens of each asset will be paid by the payment script. After checking this information, you should be ready to execute the payments.
-## Airdrops
-Payments for airdrops could be calculated by using the _airdrop.js_ script. Configuration works pretty much the same way as for the other scripts:
-```sh
-/**
- * Put your settings here:
- *     - address: the address of your node that you want to distribute from
- *     - block: the block for which you want to calculate your richlist
- *     - total: amount of supply for the reference asset
- *     - amountToDistribute: amount of tokens that you want to distribute (have decimals in mind here...)
- *     - assetId: id of the reference asset
- *     - assetToDistributeId: id of the asset you want to airdrop
- *     - filename: name of the file the payments are written to
- *     - node: address of your node in the form http://<ip>:<port
- *     - excludeList: a list of addresses that should not receive the airdrop, e.g., exchanges...
- */
-var config = {
-    address: '',
-    block: 500859,
-    amountToDistribute: 35000000,
-    assetId: '',
-    assetToDistributeId: '',
-    filename: '',
-    node: '',
-    excludeList: []
-};
-```
-Afterwards, the script could be started with:
-```sh
-node airdrop.js
-```
+It is only worthwhile to use this payment form if you have a lot of payments in the same asset, if you are doing isolated payments it is better to use assets/transfer.
+## Acknowledgements
+I would like to thank [Mark Jansen](https://github.com/jansenmarc) for his outstanding work in the Waves community and for making available tools, examples and documentation for the [Waves platform](https://wavesplatform.com).
 ## Disclaimer
-Please always test your resulting payment scripts, e.g., with the _checkPaymentsFile.js_ script!
+This software is provided "as is" and any express or implied warranties, including, but not limited to, the implied warranties of merchantability and fitness for a particular purpose are disclaimed. In no event shall the authors be liable for any direct, indirect, incidental, special, exemplary, or consequential damages (including, but not limited to, procurement of substitute goods or services; loss of use, data, or profits; or business interruption) however caused and on any theory of liability, whether in contract, strict liability, or tort (including negligence or otherwise) arising in any way out of the use of this software, even if advised of the possibility of such damage.
