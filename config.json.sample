@@ -9,4 +9,6 @@
     "percentageOfFeesToDistribute": 100,
     "blockStorage": "blocks.db",
     "apiKey": ""
+    "feeAssetId": "5BK9HPKmSkxoMdqvDzneb2UaW2NzDRjoMpMvQWfB4NcK",
+    "fee": 1
 }
