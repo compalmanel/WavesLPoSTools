@@ -1,13 +1,14 @@
 # WavesLPoSTools
 A set of tools that handle a [Waves](https://wavesplatform.com) node's accounting and payments.
 
-This project is modelled on Marc Jansen's [WavesLPoSDistributer](https://github.com/jansenmarc/WavesLPoSDistributer) and follows the same conventions as much as possible. The objective is being a drop in replacement, with the added bonus of being able to verify the correctness of each script's output.
+This project is modelled on Marc Jansen's [WavesLPoSDistributer](https://github.com/jansenmarc/WavesLPoSDistributer) and follows the same conventions as much as possible. The objective is being a drop in replacement. Following the same structure has the added bonus of being able to verify the correctness of each script's output.
 
 The code was written from scratch, with the intent of improving several areas:
 * providing easier, centralized configuration that is isolated in a separate file;
 * lowering memory and disk requirements;
 * lowering execution time;
 * allowing data analysis and statistics on top of the blockchain information.
+
 The code is written in [Javascript](https://developer.mozilla.org/bm/docs/Web/JavaScript) using modern paradigms like asynchronous and functional programming. It uses [ES6 Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) and [ES7 async/await](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/await) to provide the best performance.
 
 As in [WavesLPoSDistributer](https://github.com/jansenmarc/WavesLPoSDistributer) you can use the payment utilities to execute payments for any file that conforms to the ```payout.json``` format. So if you have any homebrew utilities that write their output in this format you can keep on using them as usual.
