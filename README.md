@@ -9,7 +9,7 @@ The code was written from scratch, with the intent of improving several areas:
 * lowering execution time;
 * allowing data analysis and statistics on top of the blockchain information.
 
-The code is written in [Javascript](https://developer.mozilla.org/bm/docs/Web/JavaScript) using modern paradigms like asynchronous and functional programming. It uses [ES6 Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) and [ES7 async/await](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/await) to provide the best performance.
+The code is written in [Javascript](https://developer.mozilla.org/bm/docs/Web/JavaScript) using modern paradigms like [asynchronous I/O](https://nodejs.org/en/docs/guides/blocking-vs-non-blocking/) and functional programming. It uses [ES6 Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) and [ES7 async/await](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/await) to provide the best performance.
 
 As in [WavesLPoSDistributer](https://github.com/jansenmarc/WavesLPoSDistributer) you can use the payment utilities to execute payments for any file that conforms to the ```payout.json``` format. So if you have any homebrew utilities that write their output in this format you can keep on using them as usual.
 
@@ -43,7 +43,7 @@ The update process is started with:
 ```sh
 node blocks.js
 ```
-This will download all the outstanding blocks and save them to the block storage database file. The first run will take a lot of time as all of the blocks since the genesis block will be downloaded. Subsequent runs will be faster as they will only need to download the delta between each run. A typical run will look this:
+This will download all the outstanding blocks and save them to the block storage database file. The first run will take a lot of time as all of the blocks since the genesis block will be downloaded. Subsequent runs will be faster as they will only need to download the delta between each run.  The output of a typical run will look this:
 ```
 Connected to the blocks database.
 Schema is ok...
@@ -82,7 +82,7 @@ This will generate a payout file which has the same format as the one generated 
 * it's almost certain that the payment items will not be ordered in the same way
 * sometimes amounts differ by a very small amount due to rounding differences
 
-So it's not possible to [diff](https://en.wikipedia.org/wiki/Diff) the files directly. A typical run will look this:
+So it's not possible to [diff](https://en.wikipedia.org/wiki/Diff) the files directly.  The output of a typical run will look this:
 ```
 Connected to the blocks database.
 Calculating payout...
@@ -93,23 +93,36 @@ The number of payments and the total amount that will be paid can be verified th
 ```sh
 node checkTransfer.js
 ```
-Always check your resulting payments and compare them to the node's expected earnings and current balance! You might need to tweak the "distributableMrtPerBlock" parameter and rerun the payout calculation for instance as the amount is not stable lately. A typical run will look this:
+Always check your resulting payments and compare them to the node's expected earnings and current balance! You might need to tweak the "distributableMrtPerBlock" parameter and rerun the payout calculation for instance as the amount is not stable lately.  The output of a typical run will look this:
 ```
-96 payments found!
-61 payments of Waves will be processed, a total of 12.08939324 will be paid!
-35 payments of MinersReward will be processed, a total of 294.02 will be paid!
+XX payments found!
+XX payments of Waves will be processed, a total of XX.XXXXXXXX will be paid!
+XX payments of MinersReward will be processed, a total of XXX.XX will be paid!
 ```
 ## Paying using the assets/transfer transaction
 After verifying the payments you can trigger the payment. The ```assetsTransfer.js``` script uses the traditional assets/transfer transaction to trigger a separate transaction for each payment. You can use an asset that has been [sponsored](https://docs.wavesplatform.com/en/proposals/sponsored-transactions.html). Use the following command to process the payments stored in ```payout.json```.
 ```sh
 node assetsTransfer.js
 ```
+If there's any error it will be reported, otherwise you will be informed of the amount of payments that were processed.  The output of a typical run will look this:
+```
+XX transfers were found, feeAssedId was overriden with '5BK9HPKmSkxoMdqvDzneb2UaW2NzDRjoMpMvQWfB4NcK' and fee is: XXXX...
+XX transfer transactions were submitted!
+XX transfer transactions were accepted!
+```
 ## Paying using the assets/massTransfer transaction
-The [mass transfer transaction](https://medium.com/@wavesgo/the-new-mass-transfer-transaction-in-action-852b60d64d01) was introduced to maximize network throughput and minimize transactions costs. You can use ```assetsMassTransfer.js``` to aggregate the payments per asset and execute those payments in the minimum amount of transactions possible. Use the following command to process the payments stored in ```payout.json```.
+The [mass transfer transaction](https://medium.com/@wavesgo/the-new-mass-transfer-transaction-in-action-852b60d64d01) was introduced to maximize network throughput and minimize transaction costs. You can use ```assetsMassTransfer.js``` to aggregate the payments per asset and execute those payments in the minimum amount of transactions possible. Use the following command to process the payments stored in ```payout.json```.
 ```sh
 node assetsMassTransfer.js
 ```
-It is only worthwhile to use this payment form if you have a lot of payments in the same asset, if you are doing isolated payments it is better to use assets/transfer.
+It is only worthwhile to use this payment form if you have a lot of payments in the same asset, if you are doing isolated payments it is better to use assets/transfer. The output of a typical run will look this:
+```
+XXX total transfers were found:
+XXX transfers of Waves
+XXX transfers of 4uK8i4ThRGbehENwa6MxyLtxAjAo1Rj9fduborGExarC
+2 massTransfer transactions were submitted!
+2 massTransfer transactions were accepted!
+```
 ## Acknowledgements
 I would like to thank [Mark Jansen](https://github.com/jansenmarc) for his outstanding work in the Waves community and for making available tools, examples and documentation for the [Waves platform](https://wavesplatform.com).
 ## Disclaimer

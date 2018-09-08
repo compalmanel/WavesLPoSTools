@@ -124,5 +124,17 @@ const calculatePayout = async function () {
   console.log(`Dumped ${payout.length} payments!`)
 }
 
-const config = JSON.parse(fs.readFileSync('config.json'))
+/**
+ * Read the configuration from 'config.json'
+ */
+const getConfig = function () {
+  try {
+    return JSON.parse(fs.readFileSync('config.json'))
+  } catch (error) {
+    console.error(`Encountered an error reading the config file: ${error.message}`)
+    process.exit(1)
+  }
+}
+
+const config = getConfig()
 calculatePayout()
