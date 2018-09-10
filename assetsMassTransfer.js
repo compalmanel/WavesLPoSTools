@@ -40,11 +40,11 @@ const submitTransfers = function () {
 
 /**
  * Function that groups transfers by their assetId
- * returns a dictionary of lists
  * each list will contain only a recipient and amount
  *
  * @param {Object} accumulator
- * @param {Object} currentValue
+ * @param {Array} currentValue
+ * @returns returns a dictionary of lists
  */
 const transfersPerAsset = function (accumulator, currentValue) {
   const assetId = currentValue.assetId ? currentValue.assetId : 'Waves'
@@ -82,10 +82,9 @@ const chunk = (arr, size) =>
  * @returns a list of Promise
  */
 const assetsMassTransfer = function (transfers, assetId) {
-  const payableTransfers = transfers.filter(transfer => transfer.amount > 0)
   const url = `${config.node}/assets/masstransfer`
   const headers = { 'Accept': 'application/json', 'Content-Type': 'application/json', 'api_key': config.apiKey }
-  const transferChunks = chunk(payableTransfers, 100)
+  const transferChunks = chunk(transfers.filter(transfer => transfer.amount > 0), 100)
   return transferChunks.map(chunk => {
     const massTransfer = {
       version: 1,

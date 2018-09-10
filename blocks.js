@@ -58,11 +58,11 @@ const schemaSQL = [
 
 /**
  * Store a transaction in the database
- * returns a Promise
  *
- * @param db the database handle that represents a valid open connection
- * @param height the height of the block this transactions belongs to
- * @param transaction the transaction object
+ * @param {Object} db the database handle that represents a valid open connection
+ * @param {number} height the height of the block this transactions belongs to
+ * @param {Object} transaction the transaction object
+ * @returns a Promise
  */
 const storeTransaction = function (db, height, transaction) {
   // handlers for each transaction type
@@ -76,10 +76,10 @@ const storeTransaction = function (db, height, transaction) {
 
 /**
  * Store a block in the database
- * returns a Promise
  *
- * @param db the database handle that represents a valid open connection
- * @param transaction the block object
+ * @param {Object} db the database handle that represents a valid open connection
+ * @param {Object} transaction the block object
+ * @returns a Promise
  */
 const storeBlock = function (db, block) {
   // calculate fees
@@ -106,11 +106,11 @@ const storeBlock = function (db, block) {
 /**
  * Returns the list of blocks that was requested
  * the blocks are retrieved in batches of 100 and saved to the database
- * returns a Promise
  *
- * @param db the database handle that represents a valid open connection
- * @param startHeight the starting block height
- * @param endHeight the ending block height
+ * @param {Object} db the database handle that represents a valid open connection
+ * @param {number} startHeight the starting block height
+ * @param {number} endHeight the ending block height
+ * @returns a Promise
  */
 const getBlocks = async function (db, startHeight, endHeight) {
   for (let i = startHeight; i <= endHeight; i += 100) {
@@ -127,8 +127,7 @@ const getBlocks = async function (db, startHeight, endHeight) {
 }
 
 /**
- * Creates of updates a sqlite database with the Waves Blockchain information
- *
+ * Create a populate a sqlite database with the Waves Blockchain information
  */
 const updateDatabase = async function () {
   // open the database

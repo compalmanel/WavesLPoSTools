@@ -20,6 +20,8 @@ module.exports = axios.create({
 
 /**
  * Read the list of transfers from a file and aggregate them per asset
+ *
+ * @returns a Promise
  */
 const checkTransfers = function () {
   const payments = JSON.parse(fs.readFileSync(config.filename))
@@ -37,8 +39,9 @@ const checkTransfers = function () {
 /**
  * Aggregate the total amount to transfer for each asset
  *
- * @param accumulator
- * @param currentValue
+ * @param {Object} accumulator
+ * @param {number} currentValue
+ * @returns a number
  */
 const sumPerAsset = function (accumulator, currentValue) {
   const assetId = currentValue.assetId ? currentValue.assetId : 'Waves'
@@ -57,7 +60,8 @@ const sumPerAsset = function (accumulator, currentValue) {
 /**
  * Invoke the node to retrieve the information about an asset, returns a promise
  *
- * @param asset The asset id
+ * @param {string} asset The asset id
+ * @returns a Promise
  */
 const getAssetInfo = function (assetId) {
   if (assetId === 'Waves') {

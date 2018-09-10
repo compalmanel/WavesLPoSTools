@@ -37,7 +37,8 @@ const submitTransfers = function () {
  * Obtain the list of transfers to process
  * if the configuration supplies an assetId it will override the input
  *
- * @param filename the filename containing the transfer list
+ * @param {string} filename the filename containing the transfer list
+ * @returns the list of transfers to process
  */
 const getTransfers = function (filename) {
   if (config.feeAssetId !== null) {
@@ -59,11 +60,12 @@ const getTransfers = function (filename) {
 }
 
 /**
- * Invoke the node to submit the transfer transaction, return a promise
+ * Invoke the node to submit the transfer transaction
  * when the promise is resolved the info about the individual transfer will be logged
  * the promise always succeeds as errors are being caught and logged
  *
- * @param transfer the object defining the transfer
+ * @param {Object} transfer the object defining the transfer
+ * @returns a Promise
  */
 const assetsTransfer = function (transfer) {
   const url = `${config.node}/assets/transfer`
