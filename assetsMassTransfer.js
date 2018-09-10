@@ -28,7 +28,7 @@ const submitTransfers = function () {
   const assets = transfers.reduce(transfersPerAsset, {})
   Object.keys(assets).map(asset => console.log(`${assets[asset].length} transfers of ${asset}`))
   const requests = Object.keys(assets).map(assetId => assetsMassTransfer(assets[assetId], assetId))
-  Promise.all(requests)
+  Promise.all([].concat(...requests))
     .then(values => {
       console.log(`${values.length} massTransfer transactions were submitted!`)
       console.log(`${values.filter(value => value != null).length} massTransfer transactions were accepted!`)
@@ -41,9 +41,10 @@ const submitTransfers = function () {
 /**
  * Function that groups transfers by their assetId
  * returns a dictionary of lists
+ * each list will contain only a recipient and amount
  *
- * @param accumulator
- * @param currentValue
+ * @param {Object} accumulator
+ * @param {Object} currentValue
  */
 const transfersPerAsset = function (accumulator, currentValue) {
   const assetId = currentValue.assetId ? currentValue.assetId : 'Waves'
@@ -52,45 +53,56 @@ const transfersPerAsset = function (accumulator, currentValue) {
     accumulator[assetId] = [transfer]
   } else {
     accumulator[assetId].push(transfer)
-  };
+  }
   return accumulator
 }
 
 /**
+ * Utility function that breaks a list into chunks of predefined size
+ *
+ * @param {Array} arr the list to chunk
+ * @param {number} size the size of each chunk
+ * @returns a list of lists
+ */
+const chunk = (arr, size) =>
+  arr
+    .reduce((acc, _, i) =>
+      (i % size)
+        ? acc
+        : [...acc, arr.slice(i, i + size)]
+    , [])
+
+/**
  * This method executes the actual asset mass transfer transaction
- * a list of promises is returned
  * when each promise is resolved the info about the individual transfers in each batch will be logged
  * every promise succeeds as errors are being caught and logged
  *
- * @param transfers the list of transfers, there is no limit on the lenght of the list, they will be submitted in batches of 100
- * @param assetId the assetId to pay, might be "Waves"
+ * @param {Array} transfers the list of transfers, there is no limit on the lenght of the list, they will be submitted in batches of 100
+ * @param {string} assetId the assetId to pay, might be "Waves"
+ * @returns a list of Promise
  */
 const assetsMassTransfer = function (transfers, assetId) {
   const payableTransfers = transfers.filter(transfer => transfer.amount > 0)
-  let batch = []
   const url = `${config.node}/assets/masstransfer`
   const headers = { 'Accept': 'application/json', 'Content-Type': 'application/json', 'api_key': config.apiKey }
-  const batchSize = 100
-  for (let i = 0; i < payableTransfers.length; i += batchSize) {
-    const transfers = payableTransfers.slice(i, i + batchSize)
-    let massTransfer = {
+  const transferChunks = chunk(payableTransfers, 100)
+  return transferChunks.map(chunk => {
+    const massTransfer = {
       version: 1,
       assetId,
       sender: config.address,
       fee: (10 + transfers.length * 5 % 10 === 0 ? 10 + transfers.length * 5 : 10 + transfers.length * 5 + 5) * 10000,
-      transfers
+      chunk
     }
     if (assetId === 'Waves') {
       delete massTransfer.assetId
     }
-    //       console.log(JSON.stringify(massTransfer));
-    //       batch.push(Promise.resolve(true));
-    batch.push(axios.post(url, massTransfer, { headers })
-      .then(value => value.data.transfers.map(transfer => console.log(`Sent ${transfer.amount} of ${value.data.assetId} to ${transfer.recipient}!`)))
+    // console.log(JSON.stringify(massTransfer))
+    // return Promise.resolve(true)
+    return axios.post(url, massTransfer, { headers })
+      .then(value => console.log(`Sent ${value.data.amount} of ${value.data.assetId} to ${value.data.recipient}!`))
       .catch(error => console.error(error.response ? `Got error status ${error.response.status} during transfer: ${error.response.data.message}` : `${error.message}`))
-    )
-  }
-  return batch
+  })
 }
 
 /**
