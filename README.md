@@ -9,6 +9,8 @@ The code was written from scratch, with the intent of improving several areas:
 * lowering execution time;
 * allowing data analysis and statistics on top of the blockchain information.
 
+There is some overlap with functionality provided by [Waves data service API](https://github.com/wavesplatform/data-service) and [Waves blockchain — PostgreSQL sync scripts](https://github.com/wavesplatform/blockchain-postgres-sync), but these projects currently don't provide all the information required to calculate a node payout (namely the lease information).
+
 The code is written in [Javascript](https://developer.mozilla.org/bm/docs/Web/JavaScript) using modern paradigms like [asynchronous I/O](https://nodejs.org/en/docs/guides/blocking-vs-non-blocking/) and functional programming. It uses [ES6 Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) and [ES7 async/await](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/await) to provide the best performance.
 
 As in [WavesLPoSDistributer](https://github.com/jansenmarc/WavesLPoSDistributer) you can use the payment utilities to execute payments for any file that conforms to the ```payout.json``` format. So if you have any homebrew utilities that write their output in this format you can keep on using them as usual.
