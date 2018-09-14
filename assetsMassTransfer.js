@@ -81,25 +81,25 @@ const chunk = (arr, size) =>
  * @param {string} assetId the assetId to pay, might be "Waves"
  * @returns a list of Promise
  */
-const assetsMassTransfer = function (transfers, assetId) {
+const assetsMassTransfer = function (payout, assetId) {
   const url = `${config.node}/assets/masstransfer`
   const headers = { 'Accept': 'application/json', 'Content-Type': 'application/json', 'api_key': config.apiKey }
-  const transferChunks = chunk(transfers.filter(transfer => transfer.amount > 0), 100)
-  return transferChunks.map(chunk => {
+  const transferChunks = chunk(payout.filter(transfer => transfer.amount > 0), 100)
+  return transferChunks.map(transfers => {
     const massTransfer = {
       version: 1,
       assetId,
       sender: config.address,
       fee: (10 + transfers.length * 5 % 10 === 0 ? 10 + transfers.length * 5 : 10 + transfers.length * 5 + 5) * 10000,
-      chunk
+      transfers
     }
     if (assetId === 'Waves') {
       delete massTransfer.assetId
     }
-    // console.log(JSON.stringify(massTransfer))
+    console.log(JSON.stringify(massTransfer))
     // return Promise.resolve(true)
     return axios.post(url, massTransfer, { headers })
-      .then(value => console.log(`Sent ${value.data.amount} of ${value.data.assetId} to ${value.data.recipient}!`))
+      .then(value => value.data.transfers.map(transfer => console.log(`Sent ${transfer.amount} of ${value.data.assetId} to ${transfer.recipient}!`)))
       .catch(error => console.error(error.response ? `Got error status ${error.response.status} during transfer: ${error.response.data.message}` : `${error.message}`))
   })
 }
