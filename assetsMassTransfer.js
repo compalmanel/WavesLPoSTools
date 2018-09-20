@@ -96,8 +96,6 @@ const assetsMassTransfer = function (payout, assetId) {
     if (assetId === 'Waves') {
       delete massTransfer.assetId
     }
-    console.log(JSON.stringify(massTransfer))
-    // return Promise.resolve(true)
     return axios.post(url, massTransfer, { headers })
       .then(value => value.data.transfers.map(transfer => console.log(`Sent ${transfer.amount} of ${value.data.assetId} to ${transfer.recipient}!`)))
       .catch(error => console.error(error.response ? `Got error status ${error.response.status} during transfer: ${error.response.data.message}` : `${error.message}`))
