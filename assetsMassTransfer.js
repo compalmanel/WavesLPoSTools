@@ -90,7 +90,7 @@ const assetsMassTransfer = function (payout, assetId) {
       version: 1,
       assetId,
       sender: config.address,
-      fee: (10 + transfers.length * 5 % 10 === 0 ? 10 + transfers.length * 5 : 10 + transfers.length * 5 + 5) * 10000,
+      fee: ((10 + transfers.length * 5) % 10 === 0 ? (10 + transfers.length * 5) : (15 + transfers.length * 5)) * 10000,
       transfers
     }
     if (assetId === 'Waves') {
