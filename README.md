@@ -25,18 +25,17 @@ npm install
 The configuration has been streamlined and all of the scripts read the necessary parameters from a single file. Once the dependencies are installed, edit the sample configuration file (```config.json.sample```) and set the values for your node. Save the file as ```config.json```.
 
 If you have used [WavesLPoSDistributer](https://github.com/jansenmarc/WavesLPoSDistributer) you should be familiar with the meaning of each parameter. They are:
-* "address": your node's public address;
-* "alias": your node's alias;
-* "startBlockHeight": the starting height for the payout calculation;
-* "endBlock": the ending height for the payout calculation;
-* "distributableMrtPerBlock": the amount of [Miners Reward Token](https://blog.wavesplatform.com/incentivizing-pos-mining-b26f8702032c) to distribute per block;
-* "filename": the payout list will be saved and read from this file, the default is ```payout.json```, and the format is the same as [WavesLPoSDistributer's](https://github.com/jansenmarc/WavesLPoSDistributer) so you can compare the output;
-* "node": the node to contact to retrieve information and transfer the payout from, you can use ```http://localhost:6869``` if you execute the scripts directly from your node's machine or through a [ssh tunnel](https://www.ssh.com/ssh/tunneling/example);
-* "percentageOfFeesToDistribute": a generator node earns fees according to the number of blocks it has forged, this parameter allows you to specify the percentage of those fees you want to distribute;
-* "blockStorage": the file where blockchain information will be saved, it defaults to ```blocks.db```;
-* "apiKey": the API key for your node, only needed for payments;
-* "feeAssetId": if you're using simple asset transfer transactions you can choose the asset that will be used to pay for the transaction fee, it needs to be a [sponsored asset](https://docs.wavesplatform.com/en/proposals/sponsored-transactions.html), mass transfers are paid only in Waves;
-* "fee": the fee amount in case of using a [sponsored transaction](https://docs.wavesplatform.com/en/proposals/sponsored-transactions.html).
+* **address**: your node's public address;
+* **startBlock**: the starting height for the payout calculation;
+* **endBlock**: the ending height for the payout calculation;
+* **distributableMrtPerBlock**: the amount of [Miners Reward Token](https://blog.wavesplatform.com/incentivizing-pos-mining-b26f8702032c) to distribute per block;
+* **filename**: the payout list will be saved and read from this file, the default is ```payout.json```, and the format is the same as [WavesLPoSDistributer's](https://github.com/jansenmarc/WavesLPoSDistributer) so you can compare the output;
+* **node**: the node to contact to retrieve information and transfer the payout from, you can use ```http://localhost:6869``` if you execute the scripts directly from your node's machine or through a [ssh tunnel](https://www.ssh.com/ssh/tunneling/example);
+* **percentageOfFeesToDistribute**: a generator node earns fees according to the number of blocks it has forged, this parameter allows you to specify the percentage of those fees you want to distribute;
+* **blockStorage**: the file where blockchain information will be saved, it defaults to ```blocks.db```;
+* **apiKey**: the API key for your node, only needed for payments;
+* **feeAssetId**: if you're using simple asset transfer transactions you can choose the asset that will be used to pay for the transaction fee, it needs to be a [sponsored asset](https://docs.wavesplatform.com/en/proposals/sponsored-transactions.html), mass transfers are paid only in Waves;
+* **fee**: the fee amount in case of using a [sponsored transaction](https://docs.wavesplatform.com/en/proposals/sponsored-transactions.html).
 After saving your configuration you can starting using the scripts.
 ## Updating the blockchain information
 Information about generated blocks and active leases is saved into a database file. A [SQLite](https://www.sqlite.org/index.html) database is used. This engine is very efficient in terms of speed, used disk space and memory consumption.
@@ -126,6 +125,11 @@ XXX transfers of 4uK8i4ThRGbehENwa6MxyLtxAjAo1Rj9fduborGExarC
 2 massTransfer transactions were accepted!
 ```
 ## Acknowledgements
-I would like to thank [Mark Jansen](https://github.com/jansenmarc) for his outstanding work in the Waves community and for making available tools, examples and documentation for the [Waves platform](https://wavesplatform.com).
+This project was started due to my work maintaining a Waves pool ([WavesPool.hokusai.ch](https://wavespool.hokusai.ch/)). I decided to brush up on my JavaScript skills and as a pet project I started working on set of tools that handle a Waves node’s accounting and payments.
+
+I would like to thank [Mark Jansen](https://github.com/jansenmarc) ([WavesGo](http://wavesgo.com)) for his outstanding work in the Waves community and for making available tools, examples and documentation for the [Waves platform](https://wavesplatform.com).
+
+I would like to thank [Raúl Bernal](https://github.com/RaulBernal) ([LocalWavesNode](https://www.localwavesnode.com/)) for his help with testing in this project.
+
 ## Disclaimer
 This software is provided "as is" and any express or implied warranties, including, but not limited to, the implied warranties of merchantability and fitness for a particular purpose are disclaimed. In no event shall the authors be liable for any direct, indirect, incidental, special, exemplary, or consequential damages (including, but not limited to, procurement of substitute goods or services; loss of use, data, or profits; or business interruption) however caused and on any theory of liability, whether in contract, strict liability, or tort (including negligence or otherwise) arising in any way out of the use of this software, even if advised of the possibility of such damage.
