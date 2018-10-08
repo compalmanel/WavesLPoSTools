@@ -1,8 +1,5 @@
 {
     "address": "",
-    "startBlock": 1,
-    "endBlock": 2,
-    "distributableMrtPerBlock": 0,
     "filename": "payout.json",
     "node": "http://localhost:6869",
     "percentageOfFeesToDistribute": 100,

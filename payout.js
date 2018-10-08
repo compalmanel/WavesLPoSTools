@@ -74,8 +74,12 @@ HAVING SUM(payable) > 0`
 /**
  * Read the list of transfers from a file, and submit them to the node we are using
  * before submission transfers need to be grouped by their assetId
+ *
+ * @param {Number} startBlock the starting block for the calculation
+ * @param {Number} endBlock the end block for the calculation
+ * @param {Number} MrtPerBlock the amount of Miner's Reward Tokens to distribute per block
  */
-const calculatePayout = async function () {
+const calculatePayout = async function (startBlock, endBlock, MrtPerBlock) {
   // open the database
   const db = await sqlite.open(config.blockStorage, sqlite.OPEN_READONLY)
     .then(value => {
@@ -88,9 +92,10 @@ const calculatePayout = async function () {
     })
 
   // query the dabatase
-  console.log('Calculating payout...')
+  console.log(`Calculating payout for node ${config.address} from blocks ${startBlock} to ${endBlock}.`)
+  console.log(`${config.percentageOfFeesToDistribute}% of fees will be distributed, and ${MrtPerBlock} MRT will be paid per block.`)
   const dbrows = await Promise.all([
-    db.all(feeSQL, [config.startBlock, config.endBlock, config.address, config.startBlock, config.endBlock, config.address, config.percentageOfFeesToDistribute])
+    db.all(feeSQL, [startBlock, endBlock, config.address, startBlock, endBlock, config.address, config.percentageOfFeesToDistribute])
       .then(rows => {
         return rows.map(row => {
           return {
@@ -102,7 +107,7 @@ const calculatePayout = async function () {
           }
         })
       }),
-    db.all(mrtSQL, [config.startBlock, config.endBlock, config.address, config.startBlock, config.endBlock, config.address, config.distributableMrtPerBlock])
+    db.all(mrtSQL, [startBlock, endBlock, config.address, startBlock, endBlock, config.address, MrtPerBlock])
       .then(rows => {
         return rows.map(row => {
           return {
@@ -136,5 +141,20 @@ const getConfig = function () {
   }
 }
 
+/**
+ * Parse command line parameters
+ * @returns a list of parameters
+ */
+const getopt = function () {
+  if (process.argv.length < 5) {
+    console.error(`Syntax:
+  ${process.argv[0].split(/[\\/]/).pop()} ${process.argv[1].split(/[\\/]/).pop()} startBlock endBlock MrtPerBlock
+`)
+    process.exit(1)
+  } else {
+    return process.argv.slice(2)
+  }
+}
+
 const config = getConfig()
-calculatePayout()
+calculatePayout(...getopt())
