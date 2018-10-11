@@ -67,7 +67,7 @@ const schemaSQL = [
 const storeTransaction = function (db, height, transaction) {
   // handlers for each transaction type
   const txHandler = {
-    8: transaction => db.run(`INSERT INTO leases (id, sender, recipient, start, amount) VALUES (?, ?, ?, ?, ?);`,
+    8: transaction => db.run(`INSERT OR REPLACE INTO leases (id, sender, recipient, start, amount) VALUES (?, ?, ?, ?, ?);`,
       [transaction.id, transaction.sender, transaction.recipient, height, transaction.amount]),
     9: transaction => db.run(`UPDATE leases SET end = ? WHERE id = ?`, [height, transaction.leaseId])
   }
