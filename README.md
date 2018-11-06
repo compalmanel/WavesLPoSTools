@@ -26,9 +26,6 @@ The configuration has been streamlined and all of the scripts read the necessary
 
 If you have used [WavesLPoSDistributer](https://github.com/jansenmarc/WavesLPoSDistributer) you should be familiar with the meaning of each parameter. They are:
 * **address**: your node's public address;
-* **startBlock**: the starting height for the payout calculation;
-* **endBlock**: the ending height for the payout calculation;
-* **distributableMrtPerBlock**: the amount of [Miners Reward Token](https://blog.wavesplatform.com/incentivizing-pos-mining-b26f8702032c) to distribute per block;
 * **filename**: the payout list will be saved and read from this file, the default is ```payout.json```, and the format is the same as [WavesLPoSDistributer's](https://github.com/jansenmarc/WavesLPoSDistributer) so you can compare the output;
 * **node**: the node to contact to retrieve information and transfer the payout from, you can use ```http://localhost:6869``` if you execute the scripts directly from your node's machine or through a [ssh tunnel](https://www.ssh.com/ssh/tunneling/example);
 * **percentageOfFeesToDistribute**: a generator node earns fees according to the number of blocks it has forged, this parameter allows you to specify the percentage of those fees you want to distribute;
