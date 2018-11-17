@@ -4,7 +4,7 @@
     "node": "http://localhost:6869",
     "percentageOfFeesToDistribute": 100,
     "blockStorage": "blocks.db",
-    "apiKey": ""
+    "apiKey": "",
     "feeAssetId": "5BK9HPKmSkxoMdqvDzneb2UaW2NzDRjoMpMvQWfB4NcK",
     "fee": 1
 }

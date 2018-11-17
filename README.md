@@ -16,7 +16,7 @@ The code is written in [Javascript](https://developer.mozilla.org/bm/docs/Web/Ja
 As in [WavesLPoSDistributer](https://github.com/jansenmarc/WavesLPoSDistributer) you can use the payment utilities to execute payments for any file that conforms to the ```payout.json``` format. So if you have any homebrew utilities that write their output in this format you can keep on using them as usual.
 
 ## Installation
-You can install these utilities to your node or another machine. Uou need to install [node.js](https://nodejs.org/en/) and [npm](https://www.npmjs.com/), then clone the git repository and install the the dependencies:
+You can install these utilities to your node or another machine. Start by installing [node.js](https://nodejs.org/en/) and [npm](https://www.npmjs.com/), the easiest and cleanest way is to use your distro's package manageer. After having installed these prerequisites, clone the git repository and install the the dependencies:
 ```sh
 git clone https://github.com/compalmanel/WavesLPoSTools
 mkdir node_modules
