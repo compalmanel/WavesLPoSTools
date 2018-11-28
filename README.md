@@ -1,5 +1,5 @@
 # WavesLPoSTools
-A set of tools that handle a [Waves](https://wavesplatform.com) node's accounting and payments.
+A set of tools that handles a [Waves](https://wavesplatform.com) node's accounting and payments.
 
 This project is modelled on Marc Jansen's [WavesLPoSDistributer](https://github.com/jansenmarc/WavesLPoSDistributer) and follows the same conventions as much as possible. The objective is being a drop in replacement. Following the same architecture has the added bonus of being able to verify the correctness of each script's output.
 
