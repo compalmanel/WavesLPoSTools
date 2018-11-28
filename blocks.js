@@ -113,11 +113,12 @@ const storeBlock = function (db, block) {
  * @returns a Promise
  */
 const getBlocks = async function (db, startHeight, endHeight) {
-  for (let i = startHeight; i <= endHeight; i += 100) {
-    await axios.get(`${config.node}/blocks/seq/${i}/${i + 99}`)
+  for (let i = startHeight; i <= endHeight; i += config.batchSize) {
+    await axios.get(`${config.node}/blocks/seq/${i}/${i + config.batchSize - 1}`)
       .then(value => {
         Promise.all(value.data.map(block => storeBlock(db, block)))
-        console.log(`Stored blocks ${i} to ${i + 99}`)
+        const heights = value.data.map(block => block.height)
+        console.log(`Stored blocks ${Math.min(...heights)} to ${Math.max(...heights)}`)
       })
       .catch(error => {
         console.error(error.message)

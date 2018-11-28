@@ -6,5 +6,6 @@
     "blockStorage": "blocks.db",
     "apiKey": "",
     "feeAssetId": "5BK9HPKmSkxoMdqvDzneb2UaW2NzDRjoMpMvQWfB4NcK",
-    "fee": 1
+    "fee": 1,
+    "batchSize" : 50
 }

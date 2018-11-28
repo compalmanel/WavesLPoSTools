@@ -1,5 +1,5 @@
 # WavesLPoSTools
-A set of tools that handle a [Waves](https://wavesplatform.com) node's accounting and payments. ⚠ Currently this is beta quality software and it's not advisable to use it on Mainnet. The code is being released to gather feedback from the community and get it into a production-ready state.
+A set of tools that handle a [Waves](https://wavesplatform.com) node's accounting and payments.
 
 This project is modelled on Marc Jansen's [WavesLPoSDistributer](https://github.com/jansenmarc/WavesLPoSDistributer) and follows the same conventions as much as possible. The objective is being a drop in replacement. Following the same architecture has the added bonus of being able to verify the correctness of each script's output.
 
@@ -34,6 +34,7 @@ If you have used [WavesLPoSDistributer](https://github.com/jansenmarc/WavesLPoSD
 * **feeAssetId**: if you're using simple asset transfer transactions you can choose the asset that will be used to pay for the transaction fee, it needs to be a [sponsored asset](https://docs.wavesplatform.com/en/proposals/sponsored-transactions.html), mass transfers are paid only in Waves;
 * **fee**: the fee amount in case of using a [sponsored transaction](https://docs.wavesplatform.com/en/proposals/sponsored-transactions.html).
 After saving your configuration you can starting using the scripts.
+* **batchSize**: the amounts of blocks that will be fetched with every call to the node API when updating the blockchain information
 ## Updating the blockchain information
 Information about generated blocks and active leases is saved into a database file. A [SQLite](https://www.sqlite.org/index.html) database is used. This engine is very efficient in terms of speed, used disk space and memory consumption.
 
@@ -133,7 +134,10 @@ This project was started due to my work maintaining a Waves pool ([WavesPool.hok
 
 I would like to thank [Mark Jansen](https://github.com/jansenmarc) ([WavesGo](http://wavesgo.com)) for his outstanding work in the Waves community and for making available tools, examples and documentation for the [Waves platform](https://wavesplatform.com).
 
-I would like to thank [Raúl Bernal](https://github.com/RaulBernal) ([LocalWavesNode](https://www.localwavesnode.com/)) for his help with testing in this project.
+I would like to thank the following people for their help with testing in this project:
+* [Junky666](https://github.com/Junky666) ([JunkyNode](https://junkynode.com/))
+* [Raúl Bernal](https://github.com/RaulBernal) ([LocalWavesNode](https://www.localwavesnode.com/))
+* [sunchaser68](https://github.com/sunchaser68) ([Waves Lease](https://waveslease.com/))
 
 ## Disclaimer
 This software is provided "as is" and any express or implied warranties, including, but not limited to, the implied warranties of merchantability and fitness for a particular purpose are disclaimed. In no event shall the authors be liable for any direct, indirect, incidental, special, exemplary, or consequential damages (including, but not limited to, procurement of substitute goods or services; loss of use, data, or profits; or business interruption) however caused and on any theory of liability, whether in contract, strict liability, or tort (including negligence or otherwise) arising in any way out of the use of this software, even if advised of the possibility of such damage.
