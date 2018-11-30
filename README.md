@@ -26,7 +26,7 @@ The configuration has been streamlined and all of the scripts read the necessary
 
 If you have used [WavesLPoSDistributer](https://github.com/jansenmarc/WavesLPoSDistributer) you should be familiar with the meaning of the most important parameters. The complete list of parameters is:
 | Parameter Name | Type | Required | Description | Used when |
-| --- | ---| :---: | --- | --- |
+| --- | --- | :---: | --- | --- |
 | **address** | String | ✔ | your node's public address | calculating payout |
 | **filename** | String | ✔ | the payment list will be saved and read from this file, the default is ```payout.json```, and the format is the same as [WavesLPoSDistributer's](https://github.com/jansenmarc/WavesLPoSDistributer) so you can compare the output | calculating payout, checking generated payments, paying |
 | **node** | String | ✔ | the node to contact to retrieve information and transfer the payout from, you can use ```http://localhost:6869``` if you execute the scripts directly from your node's machine or through a [ssh tunnel](https://www.ssh.com/ssh/tunneling/example) | calculating payout, paying |
