@@ -25,18 +25,18 @@ npm install
 The configuration has been streamlined and all of the scripts read the necessary parameters from a single file. Once the dependencies are installed, edit the sample configuration file (```config.json.sample```) and set the values for your node. Save the file as ```config.json```.
 
 If you have used [WavesLPoSDistributer](https://github.com/jansenmarc/WavesLPoSDistributer) you should be familiar with the meaning of the most important parameters. The complete list of parameters is:
-| Parameter Name | Type | Required | Description | Used when |
-| --- | --- | :---: | --- | --- |
-| **address** | String | ✔ | your node's public address | calculating payout |
-| **filename** | String | ✔ | the payment list will be saved and read from this file, the default is ```payout.json```, and the format is the same as [WavesLPoSDistributer's](https://github.com/jansenmarc/WavesLPoSDistributer) so you can compare the output | calculating payout, checking generated payments, paying |
-| **node** | String | ✔ | the node to contact to retrieve information and transfer the payout from, you can use ```http://localhost:6869``` if you execute the scripts directly from your node's machine or through a [ssh tunnel](https://www.ssh.com/ssh/tunneling/example) | calculating payout, paying |
-| **percentageOfFeesToDistribute** | Integer | ✔ | a generator node earns fees according to the number of blocks it has forged, this parameter allows you to specify the percentage of those fees you want to distribute | calculating payout |
-| **blockStorage** | String | ✔ | the file where blockchain information will be saved, it defaults to ```blocks.db``` | updating blockchain information, calculating payout, checking generated payments |
-| **apiKey** | String | ✔ | the API key for your node, only needed for payments | paying |
-| **feeAssetId** | String | | if you're using simple asset transfer transactions you can choose the asset that will be used to pay for the transaction fee, it needs to be a [sponsored asset](https://docs.wavesplatform.com/en/proposals/sponsored-transactions.html), mass transfers are paid only in Waves | paying |
-| **fee** | Integer | | the fee amount in case of using a [sponsored transaction]| paying |(https://docs.wavesplatform.com/en/proposals/sponsored-transactions.html) |
-| **batchSize** | Integer | ✔ | the amounts of blocks that will be fetched with every call to the node API when updating the blockchain information | updating blockchain information |
-| **attachment** | String | | optional string parameter, when present it will be base58 encoded and included in the payout.json, this can be used to add messages or comments in payments | calculating payout |
+Parameter Name | Type | Required | Description | Used when
+--- | --- | :---: | --- | ---
+**address** | String | ✔ | your node's public address | calculating payout
+**filename** | String | ✔ | the payment list will be saved and read from this file, the default is ```payout.json```, and the format is the same as [WavesLPoSDistributer's](https://github.com/jansenmarc/WavesLPoSDistributer) so you can compare the output | calculating payout, checking generated payments, paying
+**node** | String | ✔ | the node to contact to retrieve information and transfer the payout from, you can use ```http://localhost:6869``` if you execute the scripts directly from your node's machine or through a [ssh tunnel](https://www.ssh.com/ssh/tunneling/example) | calculating payout, paying
+**percentageOfFeesToDistribute** | Integer | ✔ | a generator node earns fees according to the number of blocks it has forged, this parameter allows you to specify the percentage of those fees you want to distribute | calculating payout
+**blockStorage** | String | ✔ | the file where blockchain information will be saved, it defaults to ```blocks.db``` | updating blockchain information, calculating payout, checking generated payments
+**apiKey** | String | ✔ | the API key for your node, only needed for payments | paying
+**feeAssetId** | String | | if you're using simple asset transfer transactions you can choose the asset that will be used to pay for the transaction fee, it needs to be a [sponsored asset](https://docs.wavesplatform.com/en/proposals/sponsored-transactions.html), mass transfers are paid only in Waves | paying |
+**fee** | Integer | | the fee amount in case of using a [sponsored transaction](https://docs.wavesplatform.com/en/proposals/sponsored-transactions.html)| paying
+**batchSize** | Integer | ✔ | the amounts of blocks that will be fetched with every call to the node API when updating the blockchain information | updating blockchain information
+**attachment** | String | | optional string parameter, when present it will be base58 encoded and included in the payout.json, this can be used to add messages or comments in payments | calculating payout
 
 The **Required** column means that a parameter should be supplied when using the functionaliy associated with it. For instance, if the payment scripts are not being used, it will not be necessary to provide an **apiKey**. After saving your configuration you can starting using the scripts.
 
