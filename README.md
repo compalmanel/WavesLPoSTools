@@ -25,6 +25,7 @@ npm install
 The configuration has been streamlined and all of the scripts read the necessary parameters from a single file. Once the dependencies are installed, edit the sample configuration file (```config.json.sample```) and set the values for your node. Save the file as ```config.json```.
 
 If you have used [WavesLPoSDistributer](https://github.com/jansenmarc/WavesLPoSDistributer) you should be familiar with the meaning of the most important parameters. The complete list of parameters is:
+
 Parameter Name | Type | Required | Description | Used when
 --- | --- | :---: | --- | ---
 **address** | String | ✔ | your node's public address | calculating payout
