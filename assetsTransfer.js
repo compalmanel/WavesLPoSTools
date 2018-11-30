@@ -41,7 +41,7 @@ const submitTransfers = function () {
  * @returns the list of transfers to process
  */
 const getTransfers = function (filename) {
-  if (config.feeAssetId !== null) {
+  if (config.feeAssetId) {
     const transfers = JSON.parse(fs.readFileSync(filename)).map(transfer => ({
       'amount': transfer.amount,
       'fee': config.fee,
@@ -50,7 +50,7 @@ const getTransfers = function (filename) {
       'recipient': transfer.recipient,
       'feeAssetId': config.feeAssetId
     }))
-    console.log(`${transfers.length} transfers were found, feeAssedId was overriden with '${config.feeAssetId}' and fee is: ${config.fee}...`)
+    console.log(`${transfers.length} transfers were found, feeAssetId was overriden with '${config.feeAssetId}' and fee is: ${config.fee}...`)
     return transfers
   } else {
     const transfers = JSON.parse(fs.readFileSync(filename))
