@@ -1,6 +1,6 @@
 const sqlite = require('sqlite')
 const fs = require('fs')
-const base58 = require("base-58")
+const base58 = require('base-58')
 
 const feeSQL = `SELECT leaser,
 SUM(payable) AS amount
