@@ -15,6 +15,7 @@
   "license": "MIT",
   "dependencies": {
     "axios": "^0.18.0",
+    "base-58": "0.0.1",
     "sqlite": "^2.9.2"
   },
   "devDependencies": {

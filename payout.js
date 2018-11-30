@@ -1,5 +1,6 @@
 const sqlite = require('sqlite')
 const fs = require('fs')
+const base58 = require("base-58")
 
 const feeSQL = `SELECT leaser,
 SUM(payable) AS amount
@@ -102,7 +103,7 @@ const calculatePayout = async function (startBlock, endBlock, MrtPerBlock) {
             'amount': row.amount,
             'fee': 100000,
             'sender': config.address,
-            'attachment': '',
+            'attachment': config.attachment ? base58.encode(Buffer.from(config.attachment)) : '',
             'recipient': row.leaser
           }
         })
@@ -115,7 +116,7 @@ const calculatePayout = async function (startBlock, endBlock, MrtPerBlock) {
             'fee': 100000,
             'assetId': '4uK8i4ThRGbehENwa6MxyLtxAjAo1Rj9fduborGExarC',
             'sender': config.address,
-            'attachment': '',
+            'attachment': config.attachment ? base58.encode(Buffer.from(config.attachment)) : '',
             'recipient': row.leaser
           }
         })
