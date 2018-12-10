@@ -2,6 +2,7 @@ const axios = require('axios')
 const http = require('http')
 const https = require('https')
 const fs = require('fs')
+const base58 = require('base-58')
 
 /*
 * Create session defaults for axios
@@ -90,6 +91,7 @@ const assetsMassTransfer = function (payout, assetId) {
       version: 1,
       assetId,
       sender: config.address,
+      attachment: config.attachment ? base58.encode(Buffer.from(config.attachment)) : '',
       fee: ((10 + transfers.length * 5) % 10 === 0 ? (10 + transfers.length * 5) : (15 + transfers.length * 5)) * 10000,
       transfers
     }
