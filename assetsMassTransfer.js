@@ -22,7 +22,7 @@ module.exports = axios.create({
 /**
  * Read the list of transfers from a file, and submit them to the node we are using
  * before submission transfers need to be grouped by their assetId
- * 
+ *
  * @param {Object} config the configuration object
  */
 const submitTransfers = function (config) {
