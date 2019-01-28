@@ -16,12 +16,17 @@ The code is written in [Javascript](https://developer.mozilla.org/bm/docs/Web/Ja
 As in [WavesLPoSDistributer](https://github.com/jansenmarc/WavesLPoSDistributer) you can use the payment utilities to execute payments for any file that conforms to the ```payout.json``` format. So if you have any homebrew utilities that write their output in this format you can keep on using them as usual.
 
 ## Installation
+<<<<<<< HEAD
 You can install these utilities to your node or another machine. You need to install [node.js](https://nodejs.org/en/) and [npm](https://www.npmjs.com/), the procedure will vary depending on the Linux distribution you are using. After you have npm and node, clone the git repository into a folder and install the dependencies:
+=======
+You can install these utilities to your node or another machine. Start by installing [node.js](https://nodejs.org/en/) and [npm](https://www.npmjs.com/), the easiest and cleanest way is to use your distro's package manageer. After having installed these prerequisites, clone the git repository and install the the dependencies:
+>>>>>>> fa3a5718b47b18b292d4704f7d534ded78287e47
 ```sh
 git clone https://github.com/compalmanel/WavesLPoSTools
 cd WavesLPoSTools
 npm install
 ```
+<<<<<<< HEAD
 The configuration has been streamlined and all of the scripts read the necessary parameters from a single file. Once the dependencies are installed, copy the sample configuration file (```config.json.sample```) and set the values for your node. The file should be named ```config.json```.
 
 ```sh
@@ -29,6 +34,11 @@ cp config.json.sample config.json
 vi config.json
 ```
 If you have used [WavesLPoSDistributer](https://github.com/jansenmarc/WavesLPoSDistributer) you might already be familiar with the meaning of some of the parameters. The complete list of parameters is:
+=======
+The configuration has been streamlined and all of the scripts read the necessary parameters from a single file. Once the dependencies are installed, edit the sample configuration file (```config.json.sample```) and set the values for your node. Save the file as ```config.json```.
+
+If you have used [WavesLPoSDistributer](https://github.com/jansenmarc/WavesLPoSDistributer) you should be familiar with the meaning of the most important parameters. The complete list of parameters is:
+>>>>>>> fa3a5718b47b18b292d4704f7d534ded78287e47
 
 Parameter Name | Type | Required | Description | Used when
 --- | --- | :---: | --- | ---
