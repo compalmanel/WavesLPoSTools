@@ -1,14 +1,12 @@
 {
     "address": "",
-    "alias": "",
-    "startBlockHeight": 1,
-    "endBlock": 2,
-    "distributableMrtPerBlock": 0,
     "filename": "payout.json",
     "node": "http://localhost:6869",
     "percentageOfFeesToDistribute": 100,
     "blockStorage": "blocks.db",
-    "apiKey": ""
+    "apiKey": "",
+    "batchSize": 50,
+    "attachment": "Thank you for leasing with us",
     "feeAssetId": "5BK9HPKmSkxoMdqvDzneb2UaW2NzDRjoMpMvQWfB4NcK",
     "fee": 1
 }

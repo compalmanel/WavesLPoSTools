@@ -21,13 +21,14 @@ module.exports = axios.create({
 /**
  * Read the list of transfers from a file and aggregate them per asset
  *
+ * @param {Object} config the configuration object
  * @returns a Promise
  */
-const checkTransfers = function () {
+const checkTransfers = function (config) {
   const payments = JSON.parse(fs.readFileSync(config.filename))
   console.log(`${payments.length} payments found!`)
   const totals = payments.reduce(sumPerAsset, {})
-  Promise.all(Object.keys(totals).map(getAssetInfo))
+  Promise.all(Object.keys(totals).map(asset => getAssetInfo(config.node, asset)))
     .then(assets => {
       assets.map(asset => console.log(`${totals[asset.data.assetId].number} payments of ${asset.data.name} will be processed, a total of ${(totals[asset.data.assetId].amount / Math.pow(10, asset.data.decimals))} will be paid!`))
     })
@@ -60,10 +61,11 @@ const sumPerAsset = function (accumulator, currentValue) {
 /**
  * Invoke the node to retrieve the information about an asset, returns a promise
  *
+ * @param {string} node the node we will retrieve the information from
  * @param {string} asset The asset id
  * @returns a Promise
  */
-const getAssetInfo = function (assetId) {
+const getAssetInfo = function (node, assetId) {
   if (assetId === 'Waves') {
     return Promise.resolve({
       'data': {
@@ -73,7 +75,7 @@ const getAssetInfo = function (assetId) {
       }
     })
   } else {
-    return axios.get(`${config.node}/transactions/info/${assetId}`)
+    return axios.get(`${node}/transactions/info/${assetId}`)
   }
 }
 
@@ -89,5 +91,4 @@ const getConfig = function () {
   }
 }
 
-const config = getConfig()
-checkTransfers()
+checkTransfers(getConfig())

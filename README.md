@@ -100,7 +100,7 @@ The payout script will then analyze the blocks database to calculate the payment
 So it's not possible to [diff](https://en.wikipedia.org/wiki/Diff) the files directly.  The output of a typical run will look this:
 ```
 Connected to the blocks database.
-Calculating payout for node XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX from blocks 1201730 to 1207590.
+Calculating payout for generator XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX from blocks 1201730 to 1207590.
 100% of fees will be distributed, and 10 MRT will be paid per block.
 Dumped 172 payments!
 ```

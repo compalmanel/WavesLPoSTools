@@ -20,10 +20,12 @@ module.exports = axios.create({
 
 /**
  * Read the list of transfers from a file, and submit them to the node we are using
+ *
+ * @param {Object} config the configuration object
  */
-const submitTransfers = function () {
-  const transfers = getTransfers(config.filename)
-  Promise.all(transfers.map(assetsTransfer))
+const submitTransfers = function (config) {
+  const transfers = getTransfers(config)
+  Promise.all(transfers.map(transfer => assetsTransfer(config, transfer)))
     .then(values => {
       console.log(`${values.length} transfer transactions were submitted!`)
       console.log(`${values.filter(value => value != null).length} transfer transactions were accepted!`)
@@ -37,12 +39,12 @@ const submitTransfers = function () {
  * Obtain the list of transfers to process
  * if the configuration supplies an assetId it will override the input
  *
- * @param {string} filename the filename containing the transfer list
+ * @param {Object} config the configuration object
  * @returns the list of transfers to process
  */
-const getTransfers = function (filename) {
-  if (config.feeAssetId !== null) {
-    const transfers = JSON.parse(fs.readFileSync(filename)).map(transfer => ({
+const getTransfers = function (config) {
+  if (config.feeAssetId) {
+    const transfers = JSON.parse(fs.readFileSync(config.filename)).map(transfer => ({
       'amount': transfer.amount,
       'fee': config.fee,
       'sender': transfer.sender,
@@ -53,7 +55,7 @@ const getTransfers = function (filename) {
     console.log(`${transfers.length} transfers were found, feeAssedId was overriden with '${config.feeAssetId}' and fee is: ${config.fee}...`)
     return transfers
   } else {
-    const transfers = JSON.parse(fs.readFileSync(filename))
+    const transfers = JSON.parse(fs.readFileSync(config.filename))
     console.log(`${transfers.length} transfers were found...`)
     return transfers
   }
@@ -64,10 +66,11 @@ const getTransfers = function (filename) {
  * when the promise is resolved the info about the individual transfer will be logged
  * the promise always succeeds as errors are being caught and logged
  *
+ * @param {Object} config the configuration object
  * @param {Object} transfer the object defining the transfer
  * @returns a Promise
  */
-const assetsTransfer = function (transfer) {
+const assetsTransfer = function (config, transfer) {
   const url = `${config.node}/assets/transfer`
   const headers = { 'Accept': 'application/json', 'Content-Type': 'application/json', 'api_key': config.apiKey }
   return axios.post(url, transfer, { headers })
@@ -87,5 +90,4 @@ const getConfig = function () {
   }
 }
 
-const config = getConfig()
-submitTransfers()
+submitTransfers(getConfig())

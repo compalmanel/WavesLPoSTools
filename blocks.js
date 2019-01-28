@@ -61,7 +61,7 @@ const schemaSQL = [
  *
  * @param {Object} db the database handle that represents a valid open connection
  * @param {number} height the height of the block this transactions belongs to
- * @param {Object} transaction the transaction object
+ * @param {Object} transaction the object containing the transaction information
  * @returns a Promise
  */
 const storeTransaction = function (db, height, transaction) {
@@ -78,7 +78,7 @@ const storeTransaction = function (db, height, transaction) {
  * Store a block in the database
  *
  * @param {Object} db the database handle that represents a valid open connection
- * @param {Object} transaction the block object
+ * @param {Object} block the object containing the block information
  * @returns a Promise
  */
 const storeBlock = function (db, block) {
@@ -108,16 +108,18 @@ const storeBlock = function (db, block) {
  * the blocks are retrieved in batches of 100 and saved to the database
  *
  * @param {Object} db the database handle that represents a valid open connection
+ * @param {string} node the node we will retrieve the information from
+ * @param {number} batchSize the number of blocks to download in each call
  * @param {number} startHeight the starting block height
  * @param {number} endHeight the ending block height
  * @returns a Promise
  */
-const getBlocks = async function (db, startHeight, endHeight) {
-  for (let i = startHeight; i <= endHeight; i += 100) {
-    await axios.get(`${config.node}/blocks/seq/${i}/${i + 99}`)
+const getBlocks = async function (db, node, batchSize, startHeight, endHeight) {
+  for (let i = startHeight; i <= endHeight; i += batchSize) {
+    await axios.get(`${node}/blocks/seq/${i}/${i + batchSize - 1}`)
       .then(value => {
         Promise.all(value.data.map(block => storeBlock(db, block)))
-        console.log(`Stored blocks ${i} to ${i + 99}`)
+        console.log(`Stored blocks ${i} to ${i + batchSize - 1}`)
       })
       .catch(error => {
         console.error(error.message)
@@ -128,8 +130,10 @@ const getBlocks = async function (db, startHeight, endHeight) {
 
 /**
  * Create a populate a sqlite database with the Waves Blockchain information
+ *
+ * @param {Object} config the configuration object
  */
-const updateDatabase = async function () {
+const updateDatabase = async function (config) {
   // open the database
   const db = await sqlite.open(config.blockStorage)
     .then(value => {
@@ -158,11 +162,11 @@ const updateDatabase = async function () {
     axios.get(`${config.node}/blocks/height`)
       .then(value => value.data.height)
   ]).catch(error => {
-    console.error(error.message)
+    console.error(`Error getting missing blocks: ${error.message}`)
     process.exit(1)
   })
   console.log(`Will try to download blocks from ${start} to ${end}`)
-  await getBlocks(db, start, end)
+  await getBlocks(db, config.node, config.batchSize, start, end)
 
   // close the database
   db.close()
@@ -187,5 +191,4 @@ const getConfig = function () {
   }
 }
 
-const config = getConfig()
-updateDatabase()
+updateDatabase(getConfig())

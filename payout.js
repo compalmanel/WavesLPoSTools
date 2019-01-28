@@ -1,5 +1,7 @@
 const sqlite = require('sqlite')
 const fs = require('fs')
+const path = require('path')
+const base58 = require('base-58')
 
 const feeSQL = `SELECT leaser,
 SUM(payable) AS amount
@@ -74,8 +76,11 @@ HAVING SUM(payable) > 0`
 /**
  * Read the list of transfers from a file, and submit them to the node we are using
  * before submission transfers need to be grouped by their assetId
+ *
+ * @param {Object} config the configuration object
+ * @param {Object} args the command line arguments we received
  */
-const calculatePayout = async function () {
+const calculatePayout = async function (config, args) {
   // open the database
   const db = await sqlite.open(config.blockStorage, sqlite.OPEN_READONLY)
     .then(value => {
@@ -88,21 +93,22 @@ const calculatePayout = async function () {
     })
 
   // query the dabatase
-  console.log('Calculating payout...')
+  console.log(`Calculating payout for generator ${config.address} from blocks ${args.startBlock} to ${args.endBlock}.`)
+  console.log(`${config.percentageOfFeesToDistribute}% of fees will be distributed, and ${args.MrtPerBlock} MRT will be paid per block.`)
   const dbrows = await Promise.all([
-    db.all(feeSQL, [config.startBlock, config.endBlock, config.address, config.startBlock, config.endBlock, config.address, config.percentageOfFeesToDistribute])
+    db.all(feeSQL, [args.startBlock, args.endBlock, config.address, args.startBlock, args.endBlock, config.address, config.percentageOfFeesToDistribute])
       .then(rows => {
         return rows.map(row => {
           return {
             'amount': row.amount,
             'fee': 100000,
             'sender': config.address,
-            'attachment': '',
+            'attachment': base58.encode(Buffer.from(config.attachment)),
             'recipient': row.leaser
           }
         })
       }),
-    db.all(mrtSQL, [config.startBlock, config.endBlock, config.address, config.startBlock, config.endBlock, config.address, config.distributableMrtPerBlock])
+    db.all(mrtSQL, [args.startBlock, args.endBlock, config.address, args.startBlock, args.endBlock, config.address, args.MrtPerBlock])
       .then(rows => {
         return rows.map(row => {
           return {
@@ -110,7 +116,7 @@ const calculatePayout = async function () {
             'fee': 100000,
             'assetId': '4uK8i4ThRGbehENwa6MxyLtxAjAo1Rj9fduborGExarC',
             'sender': config.address,
-            'attachment': '',
+            'attachment': base58.encode(Buffer.from(config.attachment)),
             'recipient': row.leaser
           }
         })
@@ -136,5 +142,21 @@ const getConfig = function () {
   }
 }
 
-const config = getConfig()
-calculatePayout()
+/**
+ * Get command line arguments
+ */
+const getArgs = function () {
+  const args = process.argv.slice(2).map(i => parseInt(i))
+  const nans = args.filter(i => isNaN(i))
+  if (nans.length > 0 || process.argv.length < 5) {
+    console.error(`Error parsing command line arguments...\n\nSyntax: ${path.basename(process.argv[0])} ${path.basename(process.argv[1])} startBlock endBlock MrtPerBlock`)
+    process.exit(1)
+  }
+  return {
+    'startBlock': args[0],
+    'endBlock': args[1],
+    'MrtPerBlock': args[2]
+  }
+}
+
+calculatePayout(getConfig(), getArgs())

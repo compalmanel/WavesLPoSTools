@@ -2,6 +2,7 @@ const axios = require('axios')
 const http = require('http')
 const https = require('https')
 const fs = require('fs')
+const base58 = require('base-58')
 
 /*
 * Create session defaults for axios
@@ -21,13 +22,15 @@ module.exports = axios.create({
 /**
  * Read the list of transfers from a file, and submit them to the node we are using
  * before submission transfers need to be grouped by their assetId
+ * 
+ * @param {Object} config the configuration object
  */
-const submitTransfers = function () {
+const submitTransfers = function (config) {
   const transfers = JSON.parse(fs.readFileSync(config.filename))
   console.log(`${transfers.length} total transfers were found:`)
   const assets = transfers.reduce(transfersPerAsset, {})
   Object.keys(assets).map(asset => console.log(`${assets[asset].length} transfers of ${asset}`))
-  const requests = Object.keys(assets).map(assetId => assetsMassTransfer(assets[assetId], assetId))
+  const requests = Object.keys(assets).map(assetId => assetsMassTransfer(config, assets[assetId], assetId))
   Promise.all([].concat(...requests))
     .then(values => {
       console.log(`${values.length} massTransfer transactions were submitted!`)
@@ -77,11 +80,12 @@ const chunk = (arr, size) =>
  * when each promise is resolved the info about the individual transfers in each batch will be logged
  * every promise succeeds as errors are being caught and logged
  *
+ * @param {Object} config the configuration object
  * @param {Array} transfers the list of transfers, there is no limit on the lenght of the list, they will be submitted in batches of 100
  * @param {string} assetId the assetId to pay, might be "Waves"
  * @returns a list of Promise
  */
-const assetsMassTransfer = function (payout, assetId) {
+const assetsMassTransfer = function (config, payout, assetId) {
   const url = `${config.node}/assets/masstransfer`
   const headers = { 'Accept': 'application/json', 'Content-Type': 'application/json', 'api_key': config.apiKey }
   const transferChunks = chunk(payout.filter(transfer => transfer.amount > 0), 100)
@@ -91,13 +95,12 @@ const assetsMassTransfer = function (payout, assetId) {
       assetId,
       sender: config.address,
       fee: (10 + transfers.length * 5 % 10 === 0 ? 10 + transfers.length * 5 : 10 + transfers.length * 5 + 5) * 10000,
-      transfers
+      transfers,
+      attachment: base58.encode(Buffer.from(config.attachment))
     }
     if (assetId === 'Waves') {
       delete massTransfer.assetId
     }
-    console.log(JSON.stringify(massTransfer))
-    // return Promise.resolve(true)
     return axios.post(url, massTransfer, { headers })
       .then(value => value.data.transfers.map(transfer => console.log(`Sent ${transfer.amount} of ${value.data.assetId} to ${transfer.recipient}!`)))
       .catch(error => console.error(error.response ? `Got error status ${error.response.status} during transfer: ${error.response.data.message}` : `${error.message}`))
@@ -116,5 +119,4 @@ const getConfig = function () {
   }
 }
 
-const config = getConfig()
-submitTransfers()
+submitTransfers(getConfig())
