@@ -4,7 +4,7 @@ const path = require('path')
 const base58 = require('base-58')
 
 const feeSQL = `SELECT leaser,
-SUM(payable) AS amount
+CAST( SUM(payable) AS INTEGER ) AS amount
 FROM (
     WITH block_leases AS (
       SELECT l.sender AS leaser,
@@ -30,7 +30,7 @@ FROM (
       GROUP BY b.height
     )
     SELECT l.leaser,
-           CAST( (l.amount * 1.0 / t.amount) * (? / 100) * (b1.fees * 0.4 + b2.fees * 0.6) AS INTEGER) AS payable
+           (l.amount * 1.0 / t.amount) * (? / 100) * (b1.fees * 0.4 + b2.fees * 0.6) AS payable
     FROM blocks b1
     INNER JOIN blocks b2 ON b2.height = b1.height - 1
     INNER JOIN block_leases l ON b1.height = l.height
@@ -40,7 +40,7 @@ GROUP BY leaser
 HAVING SUM(payable) > 0`
 
 const mrtSQL = `SELECT leaser,
-SUM(payable) AS amount
+CAST( SUM(payable) * 100 AS INTEGER ) AS amount
 FROM (
     WITH block_leases AS (
       SELECT l.sender AS leaser,
@@ -66,7 +66,7 @@ FROM (
       GROUP BY b.height
     )
     SELECT l.leaser,
-           CAST(l.amount * 1.0 / t.amount * ? * 100 AS INTEGER) AS payable
+           l.amount * 1.0 / t.amount * ? AS payable
     FROM block_leases l
     INNER JOIN total_leases t ON l.height = t.height
 )
