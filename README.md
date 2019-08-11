@@ -16,10 +16,14 @@ The code is written in [Javascript](https://developer.mozilla.org/bm/docs/Web/Ja
 As in [WavesLPoSDistributer](https://github.com/jansenmarc/WavesLPoSDistributer) you can use the payment utilities to execute payments for any file that conforms to the ```payout.json``` format. So if you have any homebrew utilities that write their output in this format you can keep on using them as usual.
 
 ## Installation
-You can install these utilities to your node or another machine. You need to install [node.js](https://nodejs.org/en/) and [npm](https://www.npmjs.com/), the procedure will vary depending on the Linux distribution you are using. After you have npm and node, clone the git repository into a folder and install the dependencies:
-```sh
-git clone https://github.com/compalmanel/WavesLPoSTools
-cd WavesLPoSTools
+You can install these utilities to your node or another machine. You need to install [node.js](https://nodejs.org/en/) and [npm](https://www.npmjs.com/). The procedure will vary depending on the Linux distribution you are using, the installation in Ubuntu for instance is as easy as:
+```
+sudo apt update
+sudo apt install nodejs npm
+```
+
+After you have npm and node, download the latest release into a folder and install the dependencies using:
+```
 npm install
 ```
 The configuration has been streamlined and all of the scripts read the necessary parameters from a single file. Once the dependencies are installed, copy the sample configuration file (```config.json.sample```) and set the values for your node. The file should be named ```config.json```.
