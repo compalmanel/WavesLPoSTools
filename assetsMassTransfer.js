@@ -94,7 +94,7 @@ const assetsMassTransfer = function (config, payout, assetId) {
       version: 1,
       assetId,
       sender: config.address,
-      fee: (transfers.length % 2 === 0 ? 10 + transfers.length * 5 : 15 + transfers.length * 5) * 10000,
+      fee: (transfers.length * 5 + transfers.length % 2 * 5 + 10) * 10000,
       transfers,
       attachment: base58.encode(Buffer.from(config.attachment))
     }
