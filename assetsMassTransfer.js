@@ -92,15 +92,12 @@ const assetsMassTransfer = function (config, payout, assetId) {
   return transferChunks.map(transfers => {
     const massTransfer = {
       version: 1,
-      assetId,
       sender: config.address,
       fee: (transfers.length * 5 + transfers.length % 2 * 5 + 10) * 10000,
-      transfers,
-      attachment: base58.encode(Buffer.from(config.attachment))
+      transfers
     }
-    if (assetId === 'Waves') {
-      delete massTransfer.assetId
-    }
+    if (assetId != 'Waves') massTransfer.assetId = assetId
+    if (config.attachment) massTransfer.attachment = base58.encode(Buffer.from(config.attachment))
     return axios.post(url, massTransfer, { headers })
       .then(value => value.data.transfers.map(transfer => console.log(`Sent ${transfer.amount} of ${value.data.assetId} to ${transfer.recipient}!`)))
       .catch(error => console.error(error.response ? `Got error status ${error.response.status} during transfer: ${error.response.data.message}` : `${error.message}`))

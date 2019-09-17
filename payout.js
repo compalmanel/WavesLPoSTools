@@ -99,26 +99,28 @@ const calculatePayout = async function (config, args) {
     db.all(feeSQL, [args.startBlock, args.endBlock, config.address, args.startBlock, args.endBlock, config.address, config.percentageOfFeesToDistribute])
       .then(rows => {
         return rows.map(row => {
-          return {
-            'amount': row.amount,
+          const payout = {
+            'amount': row.amount - 50000,
             'fee': 100000,
             'sender': config.address,
-            'attachment': base58.encode(Buffer.from(config.attachment)),
             'recipient': row.leaser
           }
+          if (config.attachment) payout.attachment = base58.encode(Buffer.from(config.attachment))
+          return payout
         })
       }),
     db.all(mrtSQL, [args.startBlock, args.endBlock, config.address, args.startBlock, args.endBlock, config.address, args.MrtPerBlock])
       .then(rows => {
         return rows.map(row => {
-          return {
+          const payout = {
             'amount': row.amount,
             'fee': 100000,
             'assetId': '4uK8i4ThRGbehENwa6MxyLtxAjAo1Rj9fduborGExarC',
             'sender': config.address,
-            'attachment': base58.encode(Buffer.from(config.attachment)),
             'recipient': row.leaser
           }
+          if (config.attachment) payout.attachment = base58.encode(Buffer.from(config.attachment))
+          return payout
         })
       }) ])
     .catch(error => {
