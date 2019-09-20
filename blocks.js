@@ -56,20 +56,46 @@ const schemaSQL = [
    ORDER BY a.height ASC;`
 ]
 
+const aliasRE = /alias:W:(.+)/
+
+/**
+ * Resolve an alias to a Waves address
+ *
+ * @param {string} node the node we will retrieve the information from
+ * @param {string} alias the alias to resolve
+ * @returns a Promise
+ */
+const resolveAlias = function(node, alias) {
+  return axios.get(`${node}/alias/by-alias/${alias}`)
+  .then(value => value.data.address)
+  .catch(error => {
+      console.error(error.message)
+      process.exit(1)
+  })
+}
+
 /**
  * Store a transaction in the database
  *
  * @param {Object} db the database handle that represents a valid open connection
+ * @param {string} node the node we will retrieve the information from
  * @param {number} height the height of the block this transactions belongs to
  * @param {Object} transaction the object containing the transaction information
  * @returns a Promise
  */
-const storeTransaction = function (db, height, transaction) {
+const storeTransaction = async function (db, node, height, transaction) {
   // handlers for each transaction type
   const txHandler = {
-    8: transaction => db.run(`INSERT INTO leases (id, sender, recipient, start, amount) VALUES (?, ?, ?, ?, ?);`,
-      [transaction.id, transaction.sender, transaction.recipient, height, transaction.amount]),
-    9: transaction => db.run(`UPDATE leases SET end = ? WHERE id = ?`, [height, transaction.leaseId])
+    8: async transaction =>  {
+      const alias = aliasRE.exec(transaction.recipient)
+      const recipient = alias ? await resolveAlias(node, alias[1]) : transaction.recipient
+      if(alias) console.log(`Retrieved address '${recipient}' for alias '${alias[1]}'`)
+      db.run(`INSERT INTO leases (id, sender, recipient, start, amount) VALUES (?, ?, ?, ?, ?);`,
+      [transaction.id, transaction.sender, recipient, height, transaction.amount])
+    },
+    9: async transaction => {
+      db.run(`UPDATE leases SET end = ? WHERE id = ?`, [height, transaction.leaseId])
+    }
   }
   return transaction.type in txHandler ? txHandler[transaction.type](transaction) : Promise.resolve(true)
 }
@@ -78,10 +104,11 @@ const storeTransaction = function (db, height, transaction) {
  * Store a block in the database
  *
  * @param {Object} db the database handle that represents a valid open connection
+ * @param {string} node the node we will retrieve the information from
  * @param {Object} block the object containing the block information
  * @returns a Promise
  */
-const storeBlock = function (db, block) {
+const storeBlock = function (db, node, block) {
   // calculate fees
   const fees = block.transactions.reduce((accumulator, currentValue) => {
     if (!currentValue.feeAsset || currentValue.feeAsset === '' || currentValue.feeAsset === null) {
@@ -95,7 +122,7 @@ const storeBlock = function (db, block) {
   // write to the corresponding tables
   const savedBlock = [db.run(`INSERT OR REPLACE INTO blocks (height, generator, fees, txs, timestamp) VALUES (?, ?, ?, ?, ?);`,
     [block.height, block.generator, fees, block.transactions.length, block.timestamp])]
-  const savedTransactions = block.transactions.map(tx => storeTransaction(db, block.height, tx))
+  const savedTransactions = block.transactions.map(tx => storeTransaction(db, node, block.height, tx))
   // return a Promise
   return Promise.all([...savedBlock, ...savedTransactions])
     .catch(error => {
@@ -118,7 +145,7 @@ const getBlocks = async function (db, node, batchSize, startHeight, endHeight) {
   for (let i = startHeight; i <= endHeight; i += batchSize) {
     await axios.get(`${node}/blocks/seq/${i}/${i + batchSize - 1}`)
       .then(value => {
-        Promise.all(value.data.map(block => storeBlock(db, block)))
+        Promise.all(value.data.map(block => storeBlock(db, node, block)))
         console.log(`Stored blocks ${i} to ${i + batchSize - 1}`)
       })
       .catch(error => {
