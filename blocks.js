@@ -89,7 +89,6 @@ const storeTransaction = async function (db, node, height, transaction) {
     8: async transaction =>  {
       const alias = aliasRE.exec(transaction.recipient)
       const recipient = alias ? await resolveAlias(node, alias[1]) : transaction.recipient
-      if(alias) console.log(`Retrieved address '${recipient}' for alias '${alias[1]}'`)
       db.run(`INSERT INTO leases (id, sender, recipient, start, amount) VALUES (?, ?, ?, ?, ?);`,
       [transaction.id, transaction.sender, recipient, height, transaction.amount])
     },
