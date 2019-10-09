@@ -28,6 +28,7 @@ const schemaSQL = [
     height integer PRIMARY KEY,
     generator text NOT NULL REFERENCES nodes (address),
     fees integer NOT NULL DEFAULT 0,
+    reward integer NOT NULL DEFAULT 0,
     txs integer NOT NULL DEFAULT 0,
     timestamp integer NOT NULL
   );`, /*,
@@ -65,13 +66,13 @@ const aliasRE = /alias:W:(.+)/
  * @param {string} alias the alias to resolve
  * @returns a Promise
  */
-const resolveAlias = function(node, alias) {
+const resolveAlias = function (node, alias) {
   return axios.get(`${node}/alias/by-alias/${alias}`)
-  .then(value => value.data.address)
-  .catch(error => {
+    .then(value => value.data.address)
+    .catch(error => {
       console.error(error.message)
       process.exit(1)
-  })
+    })
 }
 
 /**
@@ -86,11 +87,11 @@ const resolveAlias = function(node, alias) {
 const storeTransaction = async function (db, node, height, transaction) {
   // handlers for each transaction type
   const txHandler = {
-    8: async transaction =>  {
+    8: async transaction => {
       const alias = aliasRE.exec(transaction.recipient)
       const recipient = alias ? await resolveAlias(node, alias[1]) : transaction.recipient
       db.run(`INSERT INTO leases (id, sender, recipient, start, amount) VALUES (?, ?, ?, ?, ?);`,
-      [transaction.id, transaction.sender, recipient, height, transaction.amount])
+        [transaction.id, transaction.sender, recipient, height, transaction.amount])
     },
     9: async transaction => {
       db.run(`UPDATE leases SET end = ? WHERE id = ?`, [height, transaction.leaseId])
@@ -118,9 +119,11 @@ const storeBlock = function (db, node, block) {
       return accumulator + 100000
     }
   }, 0)
+  // after activation of WEP4 save the block reward
+  const reward = (block.height >= 1740000) ? block.reward : 0
   // write to the corresponding tables
-  const savedBlock = [db.run(`INSERT OR REPLACE INTO blocks (height, generator, fees, txs, timestamp) VALUES (?, ?, ?, ?, ?);`,
-    [block.height, block.generator, fees, block.transactions.length, block.timestamp])]
+  const savedBlock = [db.run(`INSERT OR REPLACE INTO blocks (height, generator, fees, reward, txs, timestamp) VALUES (?, ?, ?, ?, ?, ?);`,
+    [block.height, block.generator, fees, reward, block.transactions.length, block.timestamp])]
   const savedTransactions = block.transactions.map(tx => storeTransaction(db, node, block.height, tx))
   // return a Promise
   return Promise.all([...savedBlock, ...savedTransactions])

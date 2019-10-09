@@ -30,7 +30,7 @@ FROM (
       GROUP BY b.height
     )
     SELECT l.leaser,
-           (l.amount * 1.0 / t.amount) * (? / 100.0) * (b1.fees * 0.4 + b2.fees * 0.6) AS payable
+           (l.amount * 1.0 / t.amount) * (? / 100.0) * (b1.fees * 0.4 + b2.fees * 0.6 + b1.reward) AS payable
     FROM blocks b1
     INNER JOIN blocks b2 ON b2.height = b1.height - 1
     INNER JOIN block_leases l ON b1.height = l.height
@@ -100,7 +100,7 @@ const calculatePayout = async function (config, args) {
       .then(rows => {
         return rows.map(row => {
           const payout = {
-            'amount': row.amount - 50000,
+            'amount': row.amount,
             'fee': 100000,
             'sender': config.address,
             'recipient': row.leaser
