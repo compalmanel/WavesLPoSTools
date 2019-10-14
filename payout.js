@@ -39,43 +39,9 @@ FROM (
 GROUP BY leaser
 HAVING SUM(payable) > 0`
 
-const mrtSQL = `SELECT leaser,
-CAST( SUM(payable) * 100 AS INTEGER ) AS amount
-FROM (
-    WITH block_leases AS (
-      SELECT l.sender AS leaser,
-             b.height AS height,
-             SUM(l.amount) AS amount
-      FROM blocks b
-      INNER JOIN leases l ON b.height >= l.start + 1000
-                          AND (b.height <= l.[end] OR l.[end] IS NULL) 
-                          AND l.recipient = b.generator
-      WHERE b.height BETWEEN ? AND ? 
-      AND b.generator = ?
-      GROUP BY l.sender,
-               b.height
-    ), total_leases AS (
-      SELECT b.height AS height,
-             SUM(l.amount) AS amount
-      FROM blocks b
-      INNER JOIN leases l ON b.height >= l.start + 1000
-                          AND (b.height <= l.[end] OR l.[end] IS NULL) 
-                          AND l.recipient = b.generator
-      WHERE b.height BETWEEN ? AND ?
-      AND b.generator = ?
-      GROUP BY b.height
-    )
-    SELECT l.leaser,
-           l.amount * 1.0 / t.amount * ? AS payable
-    FROM block_leases l
-    INNER JOIN total_leases t ON l.height = t.height
-)
-GROUP BY leaser
-HAVING SUM(payable) > 0`
-
 /**
- * Read the list of transfers from a file, and submit them to the node we are using
- * before submission transfers need to be grouped by their assetId
+ * Query the blocks database to retrieve the leasers and their respective
+ * share of the node's revenue for the given period
  *
  * @param {Object} config the configuration object
  * @param {Object} args the command line arguments we received
@@ -93,36 +59,20 @@ const calculatePayout = async function (config, args) {
     })
 
   // query the dabatase
-  console.log(`Calculating payout for generator ${config.address} from blocks ${args.startBlock} to ${args.endBlock}.`)
-  console.log(`${config.percentageOfFeesToDistribute}% of fees will be distributed, and ${args.MrtPerBlock} MRT will be paid per block.`)
-  const dbrows = await Promise.all([
-    db.all(feeSQL, [args.startBlock, args.endBlock, config.address, args.startBlock, args.endBlock, config.address, config.percentageOfFeesToDistribute])
-      .then(rows => {
-        return rows.map(row => {
-          const payout = {
-            'amount': row.amount,
-            'fee': 100000,
-            'sender': config.address,
-            'recipient': row.leaser
-          }
-          if (config.attachment) payout.attachment = base58.encode(Buffer.from(config.attachment))
-          return payout
-        })
-      }),
-    db.all(mrtSQL, [args.startBlock, args.endBlock, config.address, args.startBlock, args.endBlock, config.address, args.MrtPerBlock])
-      .then(rows => {
-        return rows.map(row => {
-          const payout = {
-            'amount': row.amount,
-            'fee': 100000,
-            'assetId': '4uK8i4ThRGbehENwa6MxyLtxAjAo1Rj9fduborGExarC',
-            'sender': config.address,
-            'recipient': row.leaser
-          }
-          if (config.attachment) payout.attachment = base58.encode(Buffer.from(config.attachment))
-          return payout
-        })
-      }) ])
+  console.log(`Distributing ${config.percentageOfFeesToDistribute}% of fees and rewards for generator ${config.address} from blocks ${args.startBlock} to ${args.endBlock}.`)
+  const dbrows = await db.all(feeSQL, [args.startBlock, args.endBlock, config.address, args.startBlock, args.endBlock, config.address, config.percentageOfFeesToDistribute])
+    .then(rows => {
+      return rows.map(row => {
+        const payout = {
+          'amount': row.amount - 50000,
+          'fee': 100000,
+          'sender': config.address,
+          'recipient': row.leaser
+        }
+        if (config.attachment) payout.attachment = base58.encode(Buffer.from(config.attachment))
+        return payout
+      })
+    })
     .catch(error => {
       console.error(error.message)
       process.exit(1)
@@ -150,14 +100,13 @@ const getConfig = function () {
 const getArgs = function () {
   const args = process.argv.slice(2).map(i => parseInt(i))
   const nans = args.filter(i => isNaN(i))
-  if (nans.length > 0 || process.argv.length < 5) {
-    console.error(`Error parsing command line arguments...\n\nSyntax: ${path.basename(process.argv[0])} ${path.basename(process.argv[1])} startBlock endBlock MrtPerBlock`)
+  if (nans.length > 0 || process.argv.length < 4) {
+    console.error(`Error parsing command line arguments...\n\nSyntax: ${path.basename(process.argv[0])} ${path.basename(process.argv[1])} startBlock endBlock`)
     process.exit(1)
   }
   return {
     'startBlock': args[0],
-    'endBlock': args[1],
-    'MrtPerBlock': args[2]
+    'endBlock': args[1]
   }
 }
 
