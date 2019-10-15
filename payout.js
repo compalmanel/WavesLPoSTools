@@ -62,7 +62,7 @@ const calculatePayout = async function (config, args) {
 
   // query the dabatase
   console.log(`Calculating fees and rewards for generator ${config.address} from blocks ${args.startBlock} to ${args.endBlock}.`)
-  console.log(`Will distribute ${config.percentageOfFeesToDistribute}% of earnings, and charge ${leaserTransferFee} Waves for each transfer.`)
+  console.log(`Will distribute ${config.percentageOfFeesToDistribute}% of earnings, and deduct ${leaserTransferFee} Waves from each transfer.`)
   const dbrows = await db.all(feeSQL, [args.startBlock, args.endBlock, config.address, args.startBlock, args.endBlock, config.address, config.percentageOfFeesToDistribute])
     .then(rows => {
       return rows.map(row => {
