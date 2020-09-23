@@ -6,7 +6,7 @@ To download and manually deploy the latest blockchain database, complete the fol
 
 1. Download the **blocks.tar** archive containing the latest database from the links below.
 
-    Last: [**blocks.tar**](https://raw.githubusercontent.com/compalmanel/WavesLPoSTools/blob/master/db/blocks.tar)
+    Last: [**blocks.tar**](https://github.com/cryptolopes/WavesLPoSTools/raw/db/db/blocks.tar)
 
     The approximate size of the latest database is 194 Mb (in September 2020).
 
@@ -23,5 +23,5 @@ To download and manually deploy the latest blockchain database, complete the fol
     Navigate to the root of WavesLPoSTools and run the following command:
 
     ```bash
-    wget -qO- https://raw.githubusercontent.com/compalmanel/WavesLPoSTools/blob/master/db/blocks.tar --show-progress | tar xf -
+    wget -qO- https://github.com/cryptolopes/WavesLPoSTools/raw/db/db/blocks.tar --show-progress | tar xfz -
     ```
