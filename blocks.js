@@ -1,4 +1,5 @@
 const sqlite = require('sqlite')
+const sqlite3 = require('sqlite3')
 const axios = require('axios')
 const http = require('http')
 const https = require('https')
@@ -164,7 +165,10 @@ const getBlocks = async function (db, node, batchSize, startHeight, endHeight) {
  */
 const updateDatabase = async function (config) {
   // open the database
-  const db = await sqlite.open(config.blockStorage)
+  const db = await sqlite.open({
+    filename: config.blockStorage,
+    driver: sqlite3.Database
+  })
     .then(value => {
       console.log('Connected to the blocks database.')
       return value

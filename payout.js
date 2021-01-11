@@ -1,4 +1,5 @@
 const sqlite = require('sqlite')
+const sqlite3 = require('sqlite3')
 const fs = require('fs')
 const path = require('path')
 const base58 = require('base-58')
@@ -50,7 +51,11 @@ const calculatePayout = async function (config, args) {
   // get the LeaserTransferFee
   const leaserTransferFee = config.leaserTransferFee || 0
   // open the database
-  const db = await sqlite.open(config.blockStorage, sqlite.OPEN_READONLY)
+  const db = await sqlite.open({
+    filename: config.blockStorage,
+    driver: sqlite3.Database,
+    mode: sqlite3.OPEN_READONLY
+  })
     .then(value => {
       console.log('Connected to the blocks database.')
       return value
@@ -81,7 +86,7 @@ const calculatePayout = async function (config, args) {
       process.exit(1)
     })
   const payout = (dbrows.reduce((a, b) => a.concat(b), [])).filter(transfer => transfer.amount > 0)
-  fs.writeFileSync(config.filename, JSON.stringify(payout))
+  fs.writeFileSync(config.filename, JSON.stringify(payout, null, 4))
   console.log(`Dumped ${payout.length} payments!`)
 }
 
