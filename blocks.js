@@ -149,7 +149,7 @@ const getBlocks = async function (db, node, batchSize, startHeight, endHeight) {
     await axios.get(`${node}/blocks/seq/${i}/${i + batchSize - 1}`)
       .then(value => {
         Promise.all(value.data.map(block => storeBlock(db, node, block)))
-        console.log(`Stored blocks ${i} to ${i + batchSize - 1}`)
+        console.log(`Stored blocks ${value.data[0].height} to ${value.data[value.data.length - 1].height}`)
       })
       .catch(error => {
         console.error(error.message)
