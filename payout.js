@@ -5,7 +5,7 @@ const path = require('path')
 const base58 = require('base-58')
 
 const feeSQL = `SELECT leaser,
-CAST( SUM(payable) AS INTEGER ) AS amount
+       SUM(payable) AS amount
 FROM (
     WITH block_leases AS (
       SELECT l.sender AS leaser,
@@ -31,7 +31,7 @@ FROM (
       GROUP BY b.height
     )
     SELECT l.leaser,
-           (l.amount * 1.0 / t.amount) * (? / 100.0) * (b1.fees * 0.4 + b2.fees * 0.6 + b1.reward) AS payable
+           CAST(((l.amount * 1.0 / t.amount) * (? / 100.0) * (b1.fees * 0.4 + b2.fees * 0.6 + b1.reward)) AS INTEGER) AS payable
     FROM blocks b1
     INNER JOIN blocks b2 ON b2.height = b1.height - 1
     INNER JOIN block_leases l ON b1.height = l.height
