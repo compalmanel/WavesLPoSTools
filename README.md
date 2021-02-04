@@ -47,6 +47,7 @@ Parameter Name | Type | Required | Description | Used when
 **fee** | Integer | | the fee amount in case of using a [sponsored transaction](https://docs.wavesplatform.com/en/proposals/sponsored-transactions.html)| paying
 **batchSize** | Integer | ✔ | the amounts of blocks that will be fetched with every call to the node API when updating the blockchain information | updating blockchain information
 **attachment** | String | | optional string parameter, when present it will be base58 encoded and included in the payout.json, this can be used to add messages or comments in payments | calculating payout
+**payCanceledLeases** | Boolean | | decide if leases that were cancelled should be payed up to the moment of cancellation or ignored altogether | calculating payout
 
 The **Required** column means that a parameter should be supplied when using the functionaliy associated with it. For instance, if the payment scripts are not being used, it will not be necessary to provide an **apiKey**. After saving your configuration you can starting using the scripts.
 

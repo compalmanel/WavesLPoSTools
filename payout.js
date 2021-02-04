@@ -4,7 +4,7 @@ const fs = require('fs')
 const path = require('path')
 const base58 = require('base-58')
 
-const feeSQL = `SELECT leaser,
+const allLeasesSQL = `SELECT leaser,
        SUM(payable) AS amount
 FROM (
     WITH block_leases AS (
@@ -13,7 +13,43 @@ FROM (
              SUM(l.amount) AS amount
       FROM blocks b
       INNER JOIN leases l ON b.height >= l.start + 1000
+                          AND (b.height <= l.[end] OR l.[end] IS NULL)
+                          AND l.recipient = b.generator
+      WHERE b.height BETWEEN ? AND ?
+      AND b.generator = ?
+      GROUP BY l.sender,
+               b.height
+    ), total_leases AS (
+      SELECT b.height AS height,
+             SUM(l.amount) AS amount
+      FROM blocks b
+      INNER JOIN leases l ON b.height >= l.start + 1000
                           AND (b.height <= l.[end] OR l.[end] IS NULL) 
+                          AND l.recipient = b.generator
+      WHERE b.height BETWEEN ? AND ?
+      AND b.generator = ?
+      GROUP BY b.height
+    )
+    SELECT l.leaser,
+           CAST(((l.amount * 1.0 / t.amount) * (? / 100.0) * (b1.fees * 0.4 + b2.fees * 0.6 + b1.reward)) AS INTEGER) AS payable
+    FROM blocks b1
+    INNER JOIN blocks b2 ON b2.height = b1.height - 1
+    INNER JOIN block_leases l ON b1.height = l.height
+    INNER JOIN total_leases t ON l.height = t.height
+)
+GROUP BY leaser
+HAVING SUM(payable) > 0`
+
+const activeLeasesSQL = `SELECT leaser,
+       SUM(payable) AS amount
+FROM (
+    WITH block_leases AS (
+      SELECT l.sender AS leaser,
+             b.height AS height,
+             SUM(l.amount) AS amount
+      FROM blocks b
+      INNER JOIN leases l ON b.height >= l.start + 1000
+                          AND l.[end] IS NULL
                           AND l.recipient = b.generator
       WHERE b.height BETWEEN ? AND ?
       AND b.generator = ?
@@ -50,6 +86,8 @@ HAVING SUM(payable) > 0`
 const calculatePayout = async function (config, args) {
   // get the LeaserTransferFee
   const leaserTransferFee = config.leaserTransferFee || 0
+  // decide wether we will pay to leasers who cancelled their lease
+  const feeSQL = config.payCanceledLeases ? allLeasesSQL : activeLeasesSQL
   // open the database
   const db = await sqlite.open({
     filename: config.blockStorage,

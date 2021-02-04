@@ -10,4 +10,5 @@
     "attachment": "Thank you for leasing with us",
     "feeAssetId": "5BK9HPKmSkxoMdqvDzneb2UaW2NzDRjoMpMvQWfB4NcK",
     "fee": 1
+    "payCanceledLeases": true
 }
