@@ -87,7 +87,7 @@ const calculatePayout = async function (config, args) {
   // get the LeaserTransferFee
   const leaserTransferFee = config.leaserTransferFee || 0
   // decide wether we will pay to leasers who cancelled their lease
-  const feeSQL = config.payCanceledLeases ? allLeasesSQL : activeLeasesSQL
+  const feeSQL = config.ignoreCancelledLeases ? activeLeasesSQL : allLeasesSQL
   // open the database
   const db = await sqlite.open({
     filename: config.blockStorage,
