@@ -12,8 +12,8 @@ FROM (
              b.height AS height,
              SUM(l.amount) AS amount
       FROM blocks b
-      INNER JOIN leases l ON b.height >= l.start + 1000
-                          AND (b.height <= l.[end] OR l.[end] IS NULL)
+      INNER JOIN leases l ON b.height > l.start + 1000
+                          AND (b.height < l.[end] OR l.[end] IS NULL)
                           AND l.recipient = b.generator
       WHERE b.height BETWEEN ? AND ?
       AND b.generator = ?
@@ -23,8 +23,8 @@ FROM (
       SELECT b.height AS height,
              SUM(l.amount) AS amount
       FROM blocks b
-      INNER JOIN leases l ON b.height >= l.start + 1000
-                          AND (b.height <= l.[end] OR l.[end] IS NULL) 
+      INNER JOIN leases l ON b.height > l.start + 1000
+                          AND (b.height < l.[end] OR l.[end] IS NULL) 
                           AND l.recipient = b.generator
       WHERE b.height BETWEEN ? AND ?
       AND b.generator = ?
