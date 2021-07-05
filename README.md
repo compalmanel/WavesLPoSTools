@@ -87,7 +87,11 @@ Stored blocks 1157222 to 1157321
 Stored blocks 1157322 to 1157421
 Closed connection to the blocks database.
 ```
-Information for all the nodes will be downloaded and parsed. The database for the current blockchain state takes 90 Mb of disk space. You can open the block storage database file with [SQLiteStudio](https://sqlitestudio.pl) to execute SQL queries and extract statistics.
+Information for all the nodes will be downloaded and parsed. The database for the current blockchain state takes 194 Mb of disk space. You can open the block storage database file with [SQLiteStudio](https://sqlitestudio.pl) to execute SQL queries and extract statistics.
+
+## Download the latest database
+You can [**download**](db/README.md) and manually deploy the latest database rather than synchronizing all Waves blockchain.
+
 ## Calculating a payout
 Unlike [WavesLPoSDistributer](https://github.com/jansenmarc/WavesLPoSDistributer) this toolset separates the process of updating the blocks information and calculating the payout. This adds more flexibility, you might update the block information at regular intervals and execute the payout calculation only when you want to distribute your pool's profits among your leasers.
 
