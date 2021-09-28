@@ -14,7 +14,7 @@
   "author": "Paulo Albuquerque",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.21.1",
+    "axios": "^0.21.2",
     "base-58": "0.0.1",
     "sqlite": "^4.0.19",
     "sqlite3": "^5.0.1"
